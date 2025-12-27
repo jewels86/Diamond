@@ -1,4 +1,9 @@
-﻿using System.Text;
+﻿using System.Runtime.InteropServices.ObjectiveC;
+using System.Text;
+using ILGPU;
+using ILGPU.Algorithms;
+using ILGPU.Runtime;
+using Jewels.Lazulite;
 
 namespace Diamond;
 
@@ -9,13 +14,11 @@ public static partial class Hashing
         var padded = PadSHA256(data);
         var hv = ComputeInitialHashValuesSHA256();
         int nChunks = padded.Length / 64;
-        //Console.WriteLine($"Padded length: {padded.Length} bytes, num chunks: {padded.Length / 64}");
-        //Console.WriteLine($"Padded bytes: {BitConverter.ToString(padded).Replace("-", "")}");
 
         for (int i = 0; i < nChunks; i++)
         {
             var chunk = new byte[64];
-            Array.Copy(padded, i * 64, chunk, 0, 64);
+            CryptographicOperations.Copy(padded, i * 64, chunk, 0, 64);
             ProcessChunk(chunk, hv);
         }
         
@@ -37,7 +40,6 @@ public static partial class Hashing
         return BitConverter.ToString(hash).Replace("-", "").ToLower();
     }
     public static string SHA256Hex(string data) => SHA256Hex(Encoding.UTF8.GetBytes(data));
-    
     #region Helpers
     private static byte[] PadSHA256(byte[] data)
     {
@@ -48,7 +50,7 @@ public static partial class Hashing
         if (paddedLength % 64 != 0) paddedLength += 64 - paddedLength % 64; // pad to the next multiple of 64 bytes
         var padded = new byte[paddedLength];
         
-        Array.Copy(data, padded, originalLength);
+        CryptographicOperations.Copy(data, 0, padded, 0, originalLength);
         padded[originalLength] = 0x80; // '1' bit (0x80 = 1000 0000)
 
         for (int i = 0; i < 8; i++)
@@ -63,8 +65,8 @@ public static partial class Hashing
 
         for (int i = 0; i < 8; i++)
         {
-            var squareRoot = Math.Sqrt(primes[i]);
-            var fractional = squareRoot - Math.Floor(squareRoot);
+            var squareRoot = XMath.Sqrt(primes[i]);
+            var fractional = squareRoot - XMath.Floor(squareRoot);
             hv[i] = (uint)(fractional * 0x1_0000_0000UL); // take the first 32 bits- we're multiplying by 2^32 to shift the fractional part into int range
         }
         
@@ -78,8 +80,8 @@ public static partial class Hashing
 
         for (int i = 0; i < 64; i++)
         {
-            var cubeRoot = Math.Pow(primes[i], 1.0 / 3.0);
-            var fractional = cubeRoot - Math.Floor(cubeRoot);
+            var cubeRoot = XMath.Pow(primes[i], 1.0 / 3.0);
+            var fractional = cubeRoot - XMath.Floor(cubeRoot);
             k[i] = (uint)(fractional * 0x1_0000_0000UL); // take the first 32 bits
         }
         
