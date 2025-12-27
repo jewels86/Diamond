@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Diamond", "Diamond\Diamond.csproj", "{D8151A42-9E11-4BF3-9612-30F18E51A322}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.csproj", "{7E4902FF-95FE-4DC4-94E5-194850A2ABCF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D8151A42-9E11-4BF3-9612-30F18E51A322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8151A42-9E11-4BF3-9612-30F18E51A322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8151A42-9E11-4BF3-9612-30F18E51A322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8151A42-9E11-4BF3-9612-30F18E51A322}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E4902FF-95FE-4DC4-94E5-194850A2ABCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E4902FF-95FE-4DC4-94E5-194850A2ABCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E4902FF-95FE-4DC4-94E5-194850A2ABCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E4902FF-95FE-4DC4-94E5-194850A2ABCF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
