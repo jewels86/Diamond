@@ -4,7 +4,8 @@ class Program
 {
     static void Main(string[] args)
     {
-        HashingTests.TestSHA256();
-        HashingTests.TestSHA512();
+        //HashingTests.TestSHA256();
+        //HashingTests.TestSHA512();
+        HashingTests.TestMD5();
     }
 }

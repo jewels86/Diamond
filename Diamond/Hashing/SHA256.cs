@@ -14,7 +14,7 @@ public static partial class Hashing
         {
             var chunk = new byte[64];
             Copy(padded, i * 64, chunk, 0, 64);
-            ProcessChunk(chunk, hv);
+            ProcessChunkSHA256(chunk, hv);
         }
         
         byte[] hash = new byte[32];
@@ -59,7 +59,7 @@ public static partial class Hashing
             padded[paddedLength - 8 + i] = (byte)(originalBitLength >> (56 - i * 8)); // this is big-endian, so we want to shift by 56 first, then 48, and so on
         return padded;
     }
-    private static void ProcessChunk(byte[] chunk, uint[] hv)
+    private static void ProcessChunkSHA256(byte[] chunk, uint[] hv)
     {
         var w = new uint[64];
         

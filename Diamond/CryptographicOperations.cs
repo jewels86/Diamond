@@ -8,6 +8,7 @@ public static class CryptographicOperations
 {
     #region Operations
     public static uint RightRotate(uint x, int n) => (x >> n) | (x << (32 - n));
+    public static uint LeftRotate(uint x, int n) => (x << n) | (x >> (32 - n));
     public static uint Choose(uint x, uint y, uint z) => (x & y) ^ (~x & z);
     public static uint Majority(uint x, uint y, uint z) => (x & y) ^ (x & z) ^ (y & z);
     public static uint USigma0(uint x) => RightRotate(x, 2) ^ RightRotate(x, 13) ^ RightRotate(x, 22);

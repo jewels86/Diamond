@@ -10,9 +10,9 @@ public class HashingTests
         Console.WriteLine("Testing SHA256...");
         var results = AcceleratedSHA256Hex(["abc", "", "hello world"]);
         
-        Console.WriteLine($"abc -> {SHA256Hex("abc")}, accelerated {results[0]}");
+        Console.WriteLine($"'abc' -> {SHA256Hex("abc")}, accelerated {results[0]}");
         Console.WriteLine($"'' -> {SHA256Hex("")}, accelerated {results[1]}");
-        Console.WriteLine($"hello world -> {SHA256Hex("hello world")}, accelerated {results[2]}");
+        Console.WriteLine($"'hello world' -> {SHA256Hex("hello world")}, accelerated {results[2]}");
 
         int n = 80000;
         string[] messages = new string[n];
@@ -34,9 +34,9 @@ public class HashingTests
         Console.WriteLine("Testing SHA512...");
         var results = AcceleratedSHA512Hex(["abc", "", "hello world"]);
         
-        Console.WriteLine($"abc -> {SHA512Hex("abc")}, accelerated {results[0]}");
+        Console.WriteLine($"'abc' -> {SHA512Hex("abc")}, accelerated {results[0]}");
         Console.WriteLine($"'' -> {SHA512Hex("")}, accelerated {results[1]}");
-        Console.WriteLine($"hello world -> {SHA512Hex("hello world")}, accelerated {results[2]}");
+        Console.WriteLine($"'hello world' -> {SHA512Hex("hello world")}, accelerated {results[2]}");
         
         int n = 80000;
         string[] messages = new string[n];
@@ -51,5 +51,29 @@ public class HashingTests
         var regularResults = messages.Select(SHA512Hex).ToArray();
         sw.Stop();
         Console.WriteLine($"Regular SHA512 took {sw.ElapsedMilliseconds}ms to hash {n} messages ({(double)n / sw.ElapsedMilliseconds} strings per ms)");
+    }
+
+    public static void TestMD5()
+    {
+        Console.WriteLine("Testing MD5...");
+        var results = AcceleratedMD5Hex(["abc", "", "hello world"]);
+        
+        Console.WriteLine($"'abc' -> {MD5Hex("abc")}, accelerated {results[0]}");
+        Console.WriteLine($"'' -> {MD5Hex("")}, accelerated {results[1]}");
+        Console.WriteLine($"'hello world' -> {MD5Hex("hello world")}, accelerated {results[2]}");
+        
+        int n = 80000;
+        string[] messages = new string[n];
+        for (int i = 0; i < n; i++) messages[i] = Guid.NewGuid().ToString();
+        
+        Stopwatch sw = Stopwatch.StartNew();
+        var acceleratedResults = AcceleratedMD5(messages);
+        sw.Stop();
+        Console.WriteLine($"Accelerated MD5 took {sw.ElapsedMilliseconds}ms to hash {n} messages");
+        
+        sw = Stopwatch.StartNew();
+        var regularResults = messages.Select(MD5Hex).ToArray();
+        sw.Stop();
+        Console.WriteLine($"Regular MD5 took {sw.ElapsedMilliseconds}ms to hash {n} messages ({(double)n / sw.ElapsedMilliseconds} strings per ms)");
     }
 }

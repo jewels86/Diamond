@@ -14,7 +14,7 @@ public static partial class Hashing
         {
             var chunk = new byte[128];
             Copy(padded, i * 128, chunk, 0, 128);
-            ProcessChunk(chunk, hv);
+            ProcessChunkSHA512(chunk, hv);
         }
     
         byte[] hash = new byte[64];
@@ -81,7 +81,7 @@ public static partial class Hashing
         return padded;
     }
 
-    private static void ProcessChunk(byte[] chunk, ulong[] hv)
+    private static void ProcessChunkSHA512(byte[] chunk, ulong[] hv)
     {
         var w = new ulong[80]; 
     

@@ -85,12 +85,9 @@ public static partial class Hashing
     #endregion
     
     #region Process Chunk Kernels
-    private static Action<Index1D,
-        ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>,
+    private static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, 
+        ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         int, int>[] ProcessChunk256Kernels { get; } = Compute.Load((Index1D i, 
         ArrayView1D<float, Stride1D.Dense> hv, 
         ArrayView1D<float, Stride1D.Dense> allChunks, 
@@ -101,10 +98,7 @@ public static partial class Hashing
         if (currentChunk >= (int)nChunks[i]) return;
         
         int chunkBaseIdx = KernelProgramming.MatrixIndexOf(i, currentChunk * 16, maxChunks * 16);
-        for (int j = 0; j < 16; j++)
-        {
-            w[(int)i * 64 + j] = allChunks[chunkBaseIdx + j];
-        }
+        for (int j = 0; j < 16; j++) w[(int)i * 64 + j] = allChunks[chunkBaseIdx + j];
 
         for (int j = 16; j < 64; j++)
         {
