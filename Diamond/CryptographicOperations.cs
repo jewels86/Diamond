@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using ILGPU;
 using ILGPU.Runtime;
-using Jewels.Lazulite;
 
 namespace Diamond;
 
@@ -55,7 +54,7 @@ public static class CryptographicOperations
     public static string HexString(byte[] bytes) => BitConverter.ToString(bytes).Replace("-", "").ToLower();
     public static string HexString(uint[] words) => "[" + string.Join(", ", words.Select(word => word.ToString("X8"))) + "]";
     public static string HexString(ulong[] words) => "[" + string.Join(", ", words.Select(word => word.ToString("X16"))) + "]";
-#endregion
+    #endregion
     
     #region Constants
     public static int[] PrimesTo80th() => // later replace these with just primes to 100 and people can loop through what they need

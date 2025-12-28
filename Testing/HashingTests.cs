@@ -26,7 +26,7 @@ public class HashingTests
         sw = Stopwatch.StartNew();
         var regularResults = messages.Select(SHA256Hex).ToArray();
         sw.Stop();
-        Console.WriteLine($"Regular SHA256 took {sw.ElapsedMilliseconds}ms to hash {n} messages ({sw.ElapsedMilliseconds / (double)n} ms per string)");
+        Console.WriteLine($"Regular SHA256 took {sw.ElapsedMilliseconds}ms to hash {n} messages ({(double)n / sw.ElapsedMilliseconds} strings per ms)");
     }
 
     public static void TestSHA512()
@@ -50,6 +50,6 @@ public class HashingTests
         sw = Stopwatch.StartNew();
         var regularResults = messages.Select(SHA512Hex).ToArray();
         sw.Stop();
-        Console.WriteLine($"Regular SHA512 took {sw.ElapsedMilliseconds}ms to hash {n} messages ({sw.ElapsedMilliseconds / (double)n} ms per string)");
+        Console.WriteLine($"Regular SHA512 took {sw.ElapsedMilliseconds}ms to hash {n} messages ({(double)n / sw.ElapsedMilliseconds} strings per ms)");
     }
 }

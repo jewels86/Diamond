@@ -1,5 +1,4 @@
-﻿using System.Text;
-using static Diamond.CryptographicOperations;
+﻿using static Diamond.CryptographicOperations;
 
 namespace Diamond;
 
