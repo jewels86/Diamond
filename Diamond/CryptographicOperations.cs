@@ -7,37 +7,23 @@ namespace Diamond;
 public static class CryptographicOperations
 {
     #region Operations
-    public static uint RightRotate(uint x, int n) => x >> n | x << 32 - n;
-    public static uint Choose(uint x, uint y, uint z) => x & y ^ ~x & z;
-    public static uint Majority(uint x, uint y, uint z) => x & y ^ x & z ^ y & z;
+    public static uint RightRotate(uint x, int n) => (x >> n) | (x << (32 - n));
+    public static uint Choose(uint x, uint y, uint z) => (x & y) ^ (~x & z);
+    public static uint Majority(uint x, uint y, uint z) => (x & y) ^ (x & z) ^ (y & z);
     public static uint USigma0(uint x) => RightRotate(x, 2) ^ RightRotate(x, 13) ^ RightRotate(x, 22);
     public static uint USigma1(uint x) => RightRotate(x, 6) ^ RightRotate(x, 11) ^ RightRotate(x, 25);
-    public static uint LSigma0(uint x) => RightRotate(x, 7) ^ RightRotate(x, 18) ^ x >> 3;
-    public static uint LSigma1(uint x) => RightRotate(x, 17) ^ RightRotate(x, 19) ^ x >> 10;
+    public static uint LSigma0(uint x) => RightRotate(x, 7) ^ RightRotate(x, 18) ^ (x >> 3);
+    public static uint LSigma1(uint x) => RightRotate(x, 17) ^ RightRotate(x, 19) ^ (x >> 10);
     #endregion
     #region Kernel Helpers
-    public static byte[] FromRange(ArrayView1D<float, Stride1D.Dense> array, int start, int originalLength)
-    {
-        var floatCount = (originalLength + 3) / 4;
-        var floats = new float[floatCount];
-        
-        for (int i = 0; i < floatCount; i++) floats[i] = array[i + start];
-        
-        var result = ByteVectorProxy.Unroll(floats, originalLength);
-        return result;
-    }
-
-    public static void WriteToRange(ArrayView1D<float, Stride1D.Dense> array, int start, byte[] bytes)
-    {
-        var floats = ByteVectorProxy.Roll(bytes);
-        for (int i = 0; i < floats.Length; i++) array[start + i] = floats[i];
-    }
-
     public static void Copy(byte[] source, int sourceIndex, byte[] destination, int destinationIndex, int length)
     {
         for (int i = 0; i < length; i++) destination[destinationIndex + i] = source[sourceIndex + i];
     }
-    public static void Copy(byte[] source, byte[] destination) => Copy(source, 0, destination, 0, source.Length);
+    public static void Copy(ArrayView1D<float, Stride1D.Dense> source, int sourceIndex, ArrayView1D<float, Stride1D.Dense> dest, int destIndex, int length)
+    {
+        for (int i = 0; i < length; i++) dest[destIndex + i] = source[sourceIndex + i];
+    }
     #endregion
     
     #region Constants

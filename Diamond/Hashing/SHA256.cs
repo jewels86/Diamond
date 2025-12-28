@@ -65,8 +65,8 @@ public static partial class Hashing
 
         for (int i = 0; i < 8; i++)
         {
-            var squareRoot = XMath.Sqrt(primes[i]);
-            var fractional = squareRoot - XMath.Floor(squareRoot);
+            var squareRoot = Math.Sqrt(primes[i]);
+            var fractional = squareRoot - Math.Floor(squareRoot);
             hv[i] = (uint)(fractional * 0x1_0000_0000UL); // take the first 32 bits- we're multiplying by 2^32 to shift the fractional part into int range
         }
         
@@ -80,8 +80,8 @@ public static partial class Hashing
 
         for (int i = 0; i < 64; i++)
         {
-            var cubeRoot = XMath.Pow(primes[i], 1.0 / 3.0);
-            var fractional = cubeRoot - XMath.Floor(cubeRoot);
+            var cubeRoot = Math.Pow(primes[i], 1.0 / 3.0);
+            var fractional = cubeRoot - Math.Floor(cubeRoot);
             k[i] = (uint)(fractional * 0x1_0000_0000UL); // take the first 32 bits
         }
         
