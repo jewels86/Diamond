@@ -7,7 +7,7 @@ namespace Diamond;
 
 public static partial class Hashing
 {
-    public static byte[][] AcceleratedSHA256(byte[][] messages, int aidx = -1)
+    public static byte[][] AcceleratedSHA256Family(byte[][] messages, uint[] initialHash, int outputBytes, int aidx = -1)
     {
         if (aidx == -1) aidx = Compute.RequestAccelerator();
         
@@ -28,7 +28,6 @@ public static partial class Hashing
         }
         var allChunks = allChunksList.ToArray();
         
-        var initialHash = ComputeInitialHashValuesSHA256();
         var allHV = new float[numMessages * 8];
         for (int i = 0; i < numMessages; i++)
             for (int j = 0; j < 8; j++)
@@ -54,14 +53,14 @@ public static partial class Hashing
         
         for (int i = 0; i < numMessages; i++)
         {
-            results[i] = new byte[32];
-            for (int j = 0; j < 8; j++)
+            results[i] = new byte[outputBytes];
+            int wordsNeeded = (outputBytes + 3) / 4;
+            for (int j = 0; j < wordsNeeded; j++)
             {
                 uint val = Interop.FloatAsInt(finalHV[i * 8 + j]);
-                results[i][j * 4]     = (byte)(val >> 24);
-                results[i][j * 4 + 1] = (byte)(val >> 16);
-                results[i][j * 4 + 2] = (byte)(val >> 8);
-                results[i][j * 4 + 3] = (byte)(val);
+                int bytesToWrite = Math.Min(4, outputBytes - j * 4);
+                for (int h = 0; h < bytesToWrite; h++)
+                    results[i][j * 4 + h] = (byte)(val >> (24 - h * 8));
             }
         }
         
@@ -71,9 +70,17 @@ public static partial class Hashing
         return results;
     }
 
-    public static byte[][] AcceleratedSHA256(string[] messages) => AcceleratedSHA256(messages.Select(Encoding.UTF8.GetBytes).ToArray());
-    public static string[] AcceleratedSHA256Hex(string[] messages) => AcceleratedSHA256(messages).Select(x => BitConverter.ToString(x).Replace("-", "").ToLower()).ToArray();
-
+    #region SHA256
+    public static byte[][] AcceleratedSHA256(byte[][] messages, int aidx = -1) => AcceleratedSHA256Family(messages, ComputeInitialHashValuesSHA256(), 32, aidx);
+    public static byte[][] AcceleratedSHA256(string[] messages, int aidx = -1) => AcceleratedSHA256(messages.Select(Encoding.UTF8.GetBytes).ToArray(), aidx);
+    public static string[] AcceleratedSHA256Hex(string[] messages, int aidx = -1) => AcceleratedSHA256(messages, aidx).Select(x => BitConverter.ToString(x).Replace("-", "").ToLower()).ToArray();
+    #endregion
+    #region SHA224
+    public static byte[][] AcceleratedSHA224(byte[][] messages, int aidx = -1) => AcceleratedSHA256Family(messages, ComputeInitialHashValuesSHA224(), 28, aidx);
+    public static byte[][] AcceleratedSHA224(string[] messages, int aidx = -1) => AcceleratedSHA224(messages.Select(Encoding.UTF8.GetBytes).ToArray(), aidx);
+    public static string[] AcceleratedSHA224Hex(string[] messages, int aidx = -1) => AcceleratedSHA224(messages, aidx).Select(x => BitConverter.ToString(x).Replace("-", "").ToLower()).ToArray();
+    #endregion
+    
     private static Action<Index1D,
         ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>,

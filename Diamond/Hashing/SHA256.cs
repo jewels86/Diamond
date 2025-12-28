@@ -9,10 +9,9 @@ namespace Diamond;
 
 public static partial class Hashing
 {
-    public static byte[] SHA256(byte[] data)
+    public static byte[] SHA256Family(byte[] data, uint[] hv, int outputBytes)
     {
         var padded = PadSHA256(data);
-        var hv = ComputeInitialHashValuesSHA256();
         int nChunks = padded.Length / 64;
 
         for (int i = 0; i < nChunks; i++)
@@ -30,8 +29,11 @@ public static partial class Hashing
             hash[i * 4 + 2] = (byte)(hv[i] >> 8);
             hash[i * 4 + 3] = (byte)hv[i];
         }
-        return hash;
+        return hash.Take(outputBytes).ToArray();
     }
+    
+    #region SHA256
+    public static byte[] SHA256(byte[] data) => SHA256Family(data, ComputeInitialHashValuesSHA256(), 32);
     public static byte[] SHA256(string data) => SHA256(Encoding.UTF8.GetBytes(data));
     
     public static string SHA256Hex(byte[] data)
@@ -40,6 +42,19 @@ public static partial class Hashing
         return BitConverter.ToString(hash).Replace("-", "").ToLower();
     }
     public static string SHA256Hex(string data) => SHA256Hex(Encoding.UTF8.GetBytes(data));
+    #endregion
+    #region SHA224
+    public static byte[] SHA224(byte[] data) => SHA256Family(data, ComputeInitialHashValuesSHA224(), 28);
+    public static byte[] SHA224(string data) => SHA224(Encoding.UTF8.GetBytes(data));
+    
+    public static string SHA224Hex(byte[] data)
+    {
+        byte[] hash = SHA224(data);
+        return BitConverter.ToString(hash).Replace("-", "").ToLower();
+    }
+    public static string SHA224Hex(string data) => SHA224Hex(Encoding.UTF8.GetBytes(data));
+    #endregion
+    
     #region Helpers
     private static byte[] PadSHA256(byte[] data)
     {
@@ -70,6 +85,20 @@ public static partial class Hashing
             hv[i] = (uint)(fractional * 0x1_0000_0000UL); // take the first 32 bits- we're multiplying by 2^32 to shift the fractional part into int range
         }
         
+        return hv;
+    }
+    private static uint[] ComputeInitialHashValuesSHA224()
+    {
+        var primes = CryptographicOperations.PrimesTo64th();
+        var hv = new uint[8];
+
+        for (int i = 0; i < 8; i++)
+        {
+            var squareRoot = Math.Sqrt(primes[i + 8]); // 9 through 16
+            var fractional = squareRoot - Math.Floor(squareRoot);
+            hv[i] = (uint)(fractional * 0x1_0000_0000UL);
+        }
+    
         return hv;
     }
     
