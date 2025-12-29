@@ -26,6 +26,35 @@ public partial class SecureBigInteger
         return new SecureBigInteger(result);
     }
 
+    private static SecureBigInteger AcceleratedMultiply(SecureBigInteger a, SecureBigInteger b)
+    {
+        var resultLength = a.Length + b.Length;
+        
+        var totalProducts = a.Length * b.Length;
+        var products = Compute.Get(a.AcceleratorIndex, totalProducts * 2);
+        Compute.Call(a.AcceleratorIndex, MultiplyKernels, totalProducts, products, a.GetAccelerated(), b.GetAccelerated());
+        
+        var reduced = Compute.Get(a.AcceleratorIndex, resultLength * 2);
+        Compute.Call(a.AcceleratorIndex, MultiplyReductionKernels, resultLength, reduced, products);
+        
+        Compute.Synchronize(a.AcceleratorIndex);
+        var resultFloats = reduced.GetAsArray1D();
+        var result = new uint[resultLength];
+
+        var carry = 0UL;
+        for (int i = 0; i < resultLength; i++)
+        {
+            var sum = (resultFloats[i * 2], resultFloats[i * 2 + 1]).AsULong();
+            sum += carry;
+            result[i] = (uint)sum;
+            carry = sum >> 32;
+        }
+        
+        Compute.Return(products, reduced);
+        
+        return new SecureBigInteger(result);
+    }
+
     private static Action<Index1D,
         ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>,
