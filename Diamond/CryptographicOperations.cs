@@ -37,6 +37,11 @@ public static class CryptographicOperations
         uint low = (uint)value;
         return (Interop.IntAsFloat(high), Interop.IntAsFloat(low));
     }
+    
+    public static uint[] Copy(uint[] source) => (uint[])source.Clone();
+    #endregion
+    #region Math Operations
+    public static int TriangularNumber(int n) => n * (n + 1) / 2;
     #endregion
     #region Kernel Helpers
     public static void Copy(byte[] source, int sourceIndex, byte[] destination, int destinationIndex, int length)
@@ -75,5 +80,21 @@ public static class CryptographicOperations
     ];
 
     public static int[] PrimesTo8th() => [2, 3, 5, 7, 11, 13, 17, 19];
+    #endregion
+    
+    #region Constant Time
+    public static class ConstantTime
+    {
+        public static uint ExtractUpperBits(ulong value) => (uint)(value >> 32);
+        public static uint ExtractOverflowBit(ulong value) => (uint)(value >> 32 & 1);
+
+        public static uint Select(uint condition, uint a, uint b)
+        {
+            // constant time select; a if condition is true, else b
+            // condition should be 0 or 1
+            uint mask = (uint)-(int)condition; // 0 or max uint
+            return a & mask | b & ~mask;
+        }
+    }
     #endregion
 }
