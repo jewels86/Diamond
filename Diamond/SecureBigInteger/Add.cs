@@ -2,37 +2,47 @@
 
 public partial class SecureBigInteger
 {
-    private static SecureBigInteger Add(SecureBigInteger a, SecureBigInteger b)
+    public static SecureBigInteger operator +(SecureBigInteger a, SecureBigInteger b) => Add(a, b);
+    public static SecureBigInteger operator -(SecureBigInteger a, SecureBigInteger b) => Subtract(a, b);
+    #region Addition
+    public static SecureBigInteger Add(SecureBigInteger a, SecureBigInteger b)
     {
-        if (!LengthsMatch(a, b, out int length)) throw new ArgumentException("Cannot add two numbers of different lengths");
+        var maxLength = Math.Max(a.Length, b.Length);
+        var paddedA = PadToLength(a, maxLength);
+        var paddedB = PadToLength(b, maxLength);
         
         var carry = 0U;
-        var result = new uint[length];
+        var result = new uint[maxLength + 1];
         
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < maxLength; i++)
         {
-            var sum = (ulong)a[i] + b[i] + carry;
+            var sum = (ulong)paddedA[i] + paddedB[i] + carry;
             result[i] = (uint)sum;
             carry = CryptographicOperations.ConstantTime.ExtractUpperBits(sum);
         }
         
+        result[maxLength] = carry;
+        
         return new SecureBigInteger(result);
     }
     
-    private static SecureBigInteger Subtract(SecureBigInteger a, SecureBigInteger b)
+    public static SecureBigInteger Subtract(SecureBigInteger a, SecureBigInteger b)
     {
-        if (!LengthsMatch(a, b, out int length)) throw new ArgumentException("Cannot add two numbers of different lengths");
+        var maxLength = Math.Max(a.Length, b.Length);
+        var paddedA = PadToLength(a, maxLength);
+        var paddedB = PadToLength(b, maxLength);
         
         var borrow = 0U;
-        var result = new uint[length];
+        var result = new uint[maxLength];
         
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < maxLength; i++)
         {
-            var diff = (ulong)a[i] - b[i] - borrow;
+            var diff = (ulong)paddedA[i] - paddedB[i] - borrow;
             result[i] = (uint)diff;
             borrow = CryptographicOperations.ConstantTime.ExtractOverflowBit(diff);
         }
         
         return new SecureBigInteger(result);
     }
+    #endregion
 }

@@ -88,6 +88,8 @@ public static class CryptographicOperations
         public static uint ExtractUpperBits(ulong value) => (uint)(value >> 32);
         public static uint ExtractOverflowBit(ulong value) => (uint)(value >> 32 & 1);
 
+        public static ulong DetectAdditionOverflow(ulong a, ulong b, ulong sum) => (a & b | (a | b) & ~sum) >> 63;
+
         public static uint Select(uint condition, uint a, uint b)
         {
             // constant time select; a if condition is true, else b

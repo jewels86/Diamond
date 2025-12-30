@@ -22,7 +22,7 @@ public sealed partial class SecureBigInteger(uint[] value) : IDisposable
 
     public int Length => _value.Length;
     public int ByteLength => Length * 4;
-    public long BitLength => ByteLength * 8L;
+    public int BitLength => ByteLength * 8;
     
     private int AcceleratorIndex => GetAccelerated().AcceleratorIndex;
 
