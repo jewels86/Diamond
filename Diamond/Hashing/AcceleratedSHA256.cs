@@ -11,7 +11,7 @@ public static partial class Hashing
     #region Accelerated SHA256 Implementation
     public static byte[][] AcceleratedSHA256Family(byte[][] messages, uint[] initialHash, int outputBytes, int aidx = -1)
     {
-        if (aidx == -1) aidx = Compute.RequestAccelerator();
+        if (aidx == -1) aidx = Compute.RequestOptimalAccelerator();
         
         byte[][] padded = messages.Select(PadSHA256).ToArray();
         int numMessages = messages.Length;
@@ -67,8 +67,6 @@ public static partial class Hashing
         }
         
         Compute.Return(hvBuffer, chunksBuffer, wBuffer, kBuffer, numChunksBuffer);
-        
-        Compute.ReleaseAccelerator(aidx);
         return results;
     }
     #endregion
@@ -85,15 +83,10 @@ public static partial class Hashing
     #endregion
     
     #region Process Chunk Kernels
-    private static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, 
+    private static KernelStorage<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        int, int>[] ProcessChunk256Kernels { get; } = Compute.Load((Index1D i, 
-        ArrayView1D<float, Stride1D.Dense> hv, 
-        ArrayView1D<float, Stride1D.Dense> allChunks, 
-        ArrayView1D<float, Stride1D.Dense> w, 
-        ArrayView1D<float, Stride1D.Dense> k, 
-        ArrayView1D<float, Stride1D.Dense> nChunks, int currentChunk, int maxChunks) =>
+        int, int>> ProcessChunk256Kernels { get; } = new((i, hv, allChunks, w, k, nChunks, currentChunk, maxChunks) =>
     {
         if (currentChunk >= (int)nChunks[i]) return;
         

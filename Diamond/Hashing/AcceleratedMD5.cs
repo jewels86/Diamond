@@ -10,7 +10,7 @@ public static partial class Hashing
     #region Accelerated MD5
     public static byte[][] AcceleratedMD5(byte[][] messages, int aidx = -1)
     {
-        if (aidx == -1) aidx = Compute.RequestAccelerator();
+        if (aidx == -1) aidx = Compute.RequestOptimalAccelerator();
         
         byte[][] padded = messages.Select(PadMD5).ToArray();
         int numMessages = messages.Length;
@@ -83,8 +83,6 @@ public static partial class Hashing
         
         Compute.Return(hvBuffer, chunksBuffer, mBuffer, kBuffer, numChunksBuffer, 
             messageIndexBuffer, shiftsBuffer);
-        
-        Compute.ReleaseAccelerator(aidx);
         return results;
     }
     public static byte[][] AcceleratedMD5(string[] messages, int aidx = -1) => AcceleratedMD5(messages.Select(FromString).ToArray(), aidx);
@@ -92,20 +90,12 @@ public static partial class Hashing
     #endregion
     
     #region Process Chunk Kernels
-    public static Action<Index1D, 
+    public static KernelStorage<Action<Index1D, 
         ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>, int, int>[] ProcessChunkMD5Kernels { get; } =
-        Compute.Load((Index1D i,
-            ArrayView1D<float, Stride1D.Dense> hv,
-            ArrayView1D<float, Stride1D.Dense> allChunks,
-            ArrayView1D<float, Stride1D.Dense> m,
-            ArrayView1D<float, Stride1D.Dense> k,
-            ArrayView1D<float, Stride1D.Dense> nChunks,
-            ArrayView1D<float, Stride1D.Dense> messageIndex,
-            ArrayView1D<float, Stride1D.Dense> shifts,
-            int currentChunk, int maxChunks) =>
+        ArrayView1D<float, Stride1D.Dense>, int, int>> ProcessChunkMD5Kernels { get; } =
+        new((i, hv, allChunks, m, k, nChunks, messageIndex, shifts, currentChunk, maxChunks) =>
         {
             if (currentChunk >= (int)nChunks[i]) return;
     

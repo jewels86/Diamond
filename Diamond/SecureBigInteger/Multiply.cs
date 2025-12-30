@@ -55,10 +55,10 @@ public partial class SecureBigInteger
         return new SecureBigInteger(result);
     }
 
-    private static Action<Index1D,
+    private static KernelStorage<Action<Index1D,
         ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] MultiplyKernels { get; } = Compute.Load((index, r, a, b) =>
+        ArrayView1D<float, Stride1D.Dense>>> MultiplyKernels { get; } = new((index, r, a, b) =>
     {
         var (i, j) = KernelProgramming.MatrixFromIndex(index, b.IntLength);
         var k = i + j;
@@ -70,9 +70,9 @@ public partial class SecureBigInteger
         r[baseIndex + i * 2 + 1] = high;
     });
 
-    private static Action<Index1D,
+    private static KernelStorage<Action<Index1D,
         ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] MultiplyReductionKernels { get; } = Compute.Load((k, r, products) =>
+        ArrayView1D<float, Stride1D.Dense>>> MultiplyReductionKernels { get; } = new((k, r, products) =>
     {
         var baseIndex = CryptographicOperations.TriangularNumber(k) * 2;
         var length = k + 1;

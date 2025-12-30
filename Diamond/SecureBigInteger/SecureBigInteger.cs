@@ -35,7 +35,7 @@ public sealed partial class SecureBigInteger(uint[] value) : IDisposable
     public void Accelerate()
     {
         if (_acceleratedValue is not null) return;
-        _acceleratedValue = new(_value.AsFloats(), Compute.RequestAccelerator());
+        _acceleratedValue = new(_value.AsFloats(), Compute.RequestOptimalAccelerator());
     }
 
     private VectorValue GetAccelerated()
