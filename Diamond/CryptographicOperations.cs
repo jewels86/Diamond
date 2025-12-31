@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using ILGPU;
 using ILGPU.Runtime;
+using Jewels.Lazulite;
 
 namespace Diamond;
 
@@ -61,6 +62,11 @@ public static class CryptographicOperations
     public static string HexString(uint[] words) => "[" + string.Join(", ", words.Select(word => word.ToString("X8"))) + "]";
     public static string HexString(ulong[] words) => "[" + string.Join(", ", words.Select(word => word.ToString("X16"))) + "]";
     #endregion
+    #region Conversion
+    public static byte[] FromFloats(float[] floats, int originalLength = -1, bool bigEndian = true) => 
+        ByteVectorProxy.Unroll(floats, originalLength == -1 ? floats.Length * 4 : originalLength, bigEndian);
+    public static byte[] FromUInts(uint[] uints, int originalLength = -1, bool bigEndian = true) => FromFloats(uints.AsFloats(), originalLength, bigEndian);
+    #endregion
     
     #region Constants
     public static int[] PrimesTo80th() => // later replace these with just primes to 100 and people can loop through what they need
@@ -92,10 +98,16 @@ public static class CryptographicOperations
 
         public static uint Select(uint condition, uint a, uint b)
         {
-            // constant time select; a if condition is true, else b
-            // condition should be 0 or 1
-            uint mask = (uint)-(int)condition; // 0 or max uint
+            uint mask = (uint)-(int)condition;
             return a & mask | b & ~mask;
+        }
+
+        public static uint TryGetLimb(ArrayView1D<float, Stride1D.Dense> limbs, int i, uint elseVal)
+        {
+            var diff = limbs.IntExtent - i - 1;
+            var hasI = (uint)(~diff >> 31) & 1;
+            var index = Select(hasI, (uint)i, 0);
+            return Select(hasI, limbs[(int)index].AsUInt(), elseVal);
         }
     }
     #endregion
