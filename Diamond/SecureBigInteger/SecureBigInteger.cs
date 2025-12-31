@@ -8,6 +8,8 @@ public sealed partial class SecureBigInteger(uint[] value) : IDisposable
     private VectorValue? _acceleratedValue;
     private bool _accelerated;
 
+    public SecureBigInteger(uint value) : this([value]) { }
+    
     public byte[] AsBytes()
     {
         // covert to bytes; not sure if this needs to be constant-time as well
@@ -45,6 +47,10 @@ public sealed partial class SecureBigInteger(uint[] value) : IDisposable
     }
 
     private uint this[int index] => _value[index];
+    
+    public static implicit operator SecureBigInteger(uint value) => new(value);
 
     public void Dispose() => _acceleratedValue?.Dispose();
+
+    public static SecureBigInteger One { get; } = new([1]);
 }

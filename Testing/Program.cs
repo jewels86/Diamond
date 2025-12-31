@@ -13,5 +13,7 @@ class Program
         BigIntTests.TestAddAndSubtract();
         BigIntTests.TestMultiply();
         BigIntTests.TestMod();
+        BigIntTests.TestMonty();
+        BigIntTests.TestModPow();
     }
 }

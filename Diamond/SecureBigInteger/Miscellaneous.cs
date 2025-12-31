@@ -37,6 +37,17 @@ public partial class SecureBigInteger
         return new SecureBigInteger(result);
     }
     
+    public uint GetBit(int index)
+    {
+        var limbIndex = index / 32;
+        var bitIndex = index % 32;
+    
+        var padded = PadToLength(this, limbIndex + 1);
+        var limb = padded[limbIndex];
+    
+        return (limb >> bitIndex) & 1U;
+    }
+    
     public override string ToString()
     {
         int highestNonZero = Length - 1;

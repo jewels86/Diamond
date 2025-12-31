@@ -32,5 +32,24 @@ public partial class SecureBigInteger
     
         return TrimToLength(result, n.Length);
     }
-    // later we 
+
+    public static SecureBigInteger ModPow(SecureBigInteger a, SecureBigInteger exponent, MontgomeryContext ctx)
+    {
+        var r0 = ctx.ToMontgomery(One);
+        var r1 = ctx.ToMontgomery(a);
+
+        for (int i = exponent.BitLength - 1; i >= 0; i--)
+        {
+            var bit = exponent.GetBit(i);
+
+            var r0Squared = ctx.Multiply(r0, r0);
+            var r1Squared = ctx.Multiply(r1, r1);
+            var r0r1 = ctx.Multiply(r0, r1);
+            
+            r0 = ConditionalSelect(bit, r0r1, r0Squared);
+            r1 = ConditionalSelect(bit, r1Squared, r0r1);
+        }
+        
+        return ctx.FromMontgomery(r0);
+    }
 }
