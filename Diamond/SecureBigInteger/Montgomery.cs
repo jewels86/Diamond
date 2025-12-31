@@ -44,6 +44,7 @@ public class MontgomeryContext : IDisposable
     public SecureBigInteger N { get; }
     public SecureBigInteger NPrime { get; }
     public SecureBigInteger R { get; } 
+    public SecureBigInteger R2 { get; }
     public int K { get; }
     
     public MontgomeryContext(SecureBigInteger n)
@@ -51,10 +52,11 @@ public class MontgomeryContext : IDisposable
         N = n;
         K = (n.BitLength + 31) / 32 * 32;
         R = SecureBigInteger.One << K;
+        R2 = R * R;
         NPrime = SecureBigInteger.ComputeNPrime(n, K);
     }
 
-    public SecureBigInteger ToMontgomery(SecureBigInteger big) => big * R % N;
+    public SecureBigInteger ToMontgomery(SecureBigInteger big) => SecureBigInteger.REDC(big * R2, this);
     public SecureBigInteger FromMontgomery(SecureBigInteger big) => SecureBigInteger.REDC(big, this);
 
     public SecureBigInteger Multiply(SecureBigInteger a, SecureBigInteger b) => SecureBigInteger.REDC(a * b, this);

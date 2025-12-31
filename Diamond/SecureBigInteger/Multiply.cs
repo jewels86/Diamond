@@ -32,9 +32,11 @@ public partial class SecureBigInteger
     private static SecureBigInteger AcceleratedMultiply(SecureBigInteger a, SecureBigInteger b)
     {
         var resultLength = a.Length + b.Length;
-        
+
         var totalProducts = a.Length * b.Length;
-        var products = Compute.Get(a.AcceleratorIndex, totalProducts * 2);
+        var maxK = a.Length + b.Length - 2;
+        var productsSize = (CryptographicOperations.TriangularNumber(maxK) + 1) * 2;
+        var products = Compute.Get(a.AcceleratorIndex, productsSize);
         Compute.Call(a.AcceleratorIndex, MultiplyKernel, totalProducts, products, a.GetAccelerated(), b.GetAccelerated());
         
         var reduced = Compute.Get(a.AcceleratorIndex, resultLength * 2);
