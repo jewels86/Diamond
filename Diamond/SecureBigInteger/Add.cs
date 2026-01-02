@@ -4,8 +4,55 @@ using Jewels.Lazulite;
 
 namespace Diamond;
 
-public partial class AcceleratedBigInteger
+public partial class SecureBigInteger
 {
+    public static SecureBigInteger operator +(SecureBigInteger a, SecureBigInteger b) => Add(a, b);
+    public static SecureBigInteger operator -(SecureBigInteger a, SecureBigInteger b) => Subtract(a, b);
+    
+    public static SecureBigInteger Add(SecureBigInteger a, SecureBigInteger b) => UseOptimal(() => AcceleratedAdd(a, b), () => HostAdd(a, b), a, b);
+    public static SecureBigInteger Subtract(SecureBigInteger a, SecureBigInteger b) => UseOptimal(() => AcceleratedSubtract(a, b), () => HostSubtract(a, b), a, b);
+    
+    #region Host
+    public static SecureBigInteger HostAdd(SecureBigInteger a, SecureBigInteger b)
+    {
+        var (hostA, hostB) = (a.AsHost(), b.AsHost());
+        var maxLen = Math.Max(hostA.Length, hostB.Length);
+
+        var carry = 0U;
+        var result = new uint[maxLen];
+        for (int i = 0; i < maxLen; i++)
+        {
+            var aVal = CryptographicOperations.ConstantTime.TryGetLimb(hostA, i, 0);
+            var bVal = CryptographicOperations.ConstantTime.TryGetLimb(hostB, i, 0);
+            var sum = (ulong)aVal + bVal + carry;
+            result[i] = (uint)sum;
+            carry = CryptographicOperations.ConstantTime.ExtractUpperBits(sum);
+        }
+        result[maxLen] = carry;
+        
+        return new(result);
+    }
+
+    public static SecureBigInteger HostSubtract(SecureBigInteger a, SecureBigInteger b)
+    {
+        var (hostA, hostB) = (a.AsHost(), b.AsHost());
+        var maxLen = Math.Max(hostA.Length, hostB.Length);
+        
+        var borrow = 0U;
+        var result = new uint[maxLen];
+        for (int i = 0; i < maxLen; i++)
+        {
+            var aVal = CryptographicOperations.ConstantTime.TryGetLimb(hostA, i, 0);
+            var bVal = CryptographicOperations.ConstantTime.TryGetLimb(hostB, i, 0);
+            var diff = (ulong)aVal - bVal - borrow;
+            result[i] = (uint)diff;
+            borrow = CryptographicOperations.ConstantTime.ExtractOverflowBit(diff);
+        }
+        
+        return new(result);
+    }
+    #endregion
+    #region Accelerated
     // in both add and subtract, we create a buffer of size maxLen * 2 and a buffer of size maxLen
     // we call the parallelized add or subtract kernel, then reduce to fill the result
     // because of lazulite's buffer pooling, allocating buffers like sums or diffs is free
@@ -13,39 +60,38 @@ public partial class AcceleratedBigInteger
     // the kernels are the main bottleneck; for small maxLen, it would be faster to do this on the CPU unaccelerated
     // but because we need to keep values in the accelerated space, we'll use kernels and parallelize to make sure it runs well for large maxLen
     
-    public static AcceleratedBigInteger operator +(AcceleratedBigInteger a, AcceleratedBigInteger b) => Add(a, b);
-    public static AcceleratedBigInteger operator -(AcceleratedBigInteger a, AcceleratedBigInteger b) => Subtract(a, b);
-    
-    public static AcceleratedBigInteger Add(AcceleratedBigInteger a, AcceleratedBigInteger b)
+    public static SecureBigInteger AcceleratedAdd(SecureBigInteger a, SecureBigInteger b)
     {
-        var aidx = a.AcceleratorIndex;
-        var maxLen = Math.Max(a.Length, b.Length);
+        var (acceleratedA, acceleratedB) = (a.AsAccelerated(), b.AsAccelerated());
+        var aidx = acceleratedA.AcceleratorIndex;
+        var maxLen = Math.Max(acceleratedA.TotalSize, acceleratedB.TotalSize);
         
         var sums = Compute.Get(aidx, maxLen * 2);
         var result = Compute.Get(aidx, maxLen);
         
-        Compute.Call(aidx, AddKernel, maxLen, sums, a, b);
+        Compute.Call(aidx, AddKernel, maxLen, sums, acceleratedA, acceleratedB);
         Compute.Call(aidx, AddReductionKernel, 1, result, sums);
         sums.Return();
         
         return new(result);
     }
 
-    public static AcceleratedBigInteger Subtract(AcceleratedBigInteger a, AcceleratedBigInteger b)
+    public static SecureBigInteger AcceleratedSubtract(SecureBigInteger a, SecureBigInteger b)
     {
-        var aidx = a.AcceleratorIndex;
-        var maxLen = Math.Max(a.Length, b.Length);
+        var (acceleratedA, acceleratedB) = (a.AsAccelerated(), b.AsAccelerated());
+        var aidx = acceleratedA.AcceleratorIndex;
+        var maxLen = Math.Max(acceleratedA.TotalSize, acceleratedB.TotalSize);
         
         var diffs = Compute.Get(aidx, maxLen * 2);
         var result = Compute.Get(aidx, maxLen);
         
-        Compute.Call(aidx, SubtractKernel, maxLen, diffs, a, b);
+        Compute.Call(aidx, SubtractKernel, maxLen, diffs, acceleratedA, acceleratedB);
         Compute.Call(aidx, SubtractReductionKernel, 1, result, diffs);
         diffs.Return();
         
         return new(result);
     }
-
+    #endregion
     #region Kernels
     public static KernelStorage<Action<Index1D,
         ArrayView1D<float, Stride1D.Dense>, 
@@ -98,34 +144,4 @@ public partial class AcceleratedBigInteger
         }
     });
     #endregion
-
-    // these are CPU implementations to help me understand what im doing
-    
-    private static uint[] TestAdd(uint[] a, uint[] b)
-    {
-        var carry = 0U;
-        var result = new uint[a.Length];
-        for (int i = 0; i < a.Length; i++)
-        {
-            var sum = (ulong)a[i] + b[i] + carry;
-            result[i] = (uint)sum;
-            carry = CryptographicOperations.ConstantTime.ExtractUpperBits(sum);
-        }
-        result[a.Length] = carry;
-        return result;
-    }
-    
-    private static uint[] TestSubtract(uint[] a, uint[] b)
-    {
-        var borrow = 0U;
-        var result = new uint[a.Length];
-        for (int i = 0; i < a.Length; i++)
-        {
-            var diff = (ulong)a[i] - b[i] - borrow;
-            result[i] = (uint)diff;
-            borrow = CryptographicOperations.ConstantTime.ExtractOverflowBit(diff);
-        }
-        
-        return result;
-    }
 }

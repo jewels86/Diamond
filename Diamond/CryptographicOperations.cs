@@ -93,6 +93,12 @@ public static class CryptographicOperations
     {
         public static uint ExtractUpperBits(ulong value) => (uint)(value >> 32);
         public static uint ExtractOverflowBit(ulong value) => (uint)(value >> 32 & 1);
+        
+        public static uint IsPositive(int value) => (uint)(-value >> 31) & 1;
+
+        public static uint GreaterThan(int a, int b) => IsPositive(a - b);
+
+        public static uint IsNonZero(int value) => (uint)((value | -value) >> 31 & 1);
 
         public static ulong DetectAdditionOverflow(ulong a, ulong b, ulong sum) => (a & b | (a | b) & ~sum) >> 63;
 
@@ -108,6 +114,19 @@ public static class CryptographicOperations
             var hasI = (uint)(~diff >> 31) & 1;
             var index = Select(hasI, (uint)i, 0);
             return Select(hasI, limbs[(int)index].AsUInt(), elseVal);
+        }
+
+        public static uint TryGetLimb(uint[] limbs, int i, uint elseVal)
+        {
+            var diff = limbs.Length - i - 1;
+            var hasI = (uint)(~diff >> 31) & 1;
+            var index = Select(hasI, (uint)i, 0);
+            return Select(hasI, limbs[(int)index], elseVal);
+        }
+        
+        public static void Copy(uint[] source, int sourceIndex, uint[] dest, int destIndex, int length)
+        {
+            for (int i = 0; i < length; i++) dest[destIndex + i] = source[sourceIndex + i];
         }
     }
     #endregion

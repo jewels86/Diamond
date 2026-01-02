@@ -1,8 +1,8 @@
 ﻿namespace Diamond;
 
-public partial class AcceleratedBigInteger
+public partial class SecureBigInteger
 {
-    public static AcceleratedBigInteger ComputeNPrime(AcceleratedBigInteger N, int k)
+    public static SecureBigInteger ComputeNPrime(SecureBigInteger N, int k)
     {
         var R = One << k;
         var NPrime = One;
@@ -16,21 +16,23 @@ public partial class AcceleratedBigInteger
 
         return (R - NPrime) % R;
     }
+    
+    // we'll do this later
 }
 
 public class MontgomeryContext : IDisposable
 {
-    public AcceleratedBigInteger N { get; }
-    public AcceleratedBigInteger NPrime { get; }
-    public AcceleratedBigInteger R { get; }
+    public SecureBigInteger N { get; }
+    public SecureBigInteger NPrime { get; }
+    public SecureBigInteger R { get; }
     public int K { get; }
 
-    public MontgomeryContext(AcceleratedBigInteger n)
+    public MontgomeryContext(SecureBigInteger n)
     {
         N = n;
         K = (n.BitLength + 31) / 32 * 32;
-        R = AcceleratedBigInteger.One << K;
-        NPrime = AcceleratedBigInteger.ComputeNPrime(n, K);
+        R = SecureBigInteger.One << K;
+        NPrime = SecureBigInteger.ComputeNPrime(n, K);
     }
 
     public void Dispose()
