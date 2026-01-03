@@ -19,7 +19,7 @@ public partial class SecureBigInteger
         var maxLen = Math.Max(hostA.Length, hostB.Length);
 
         var carry = 0U;
-        var result = new uint[maxLen];
+        var result = new uint[maxLen + 1];
         for (int i = 0; i < maxLen; i++)
         {
             var aVal = CryptographicOperations.ConstantTime.TryGetLimb(hostA, i, 0);
@@ -67,7 +67,7 @@ public partial class SecureBigInteger
         var maxLen = Math.Max(acceleratedA.TotalSize, acceleratedB.TotalSize);
         
         var sums = Compute.Get(aidx, maxLen * 2);
-        var result = Compute.Get(aidx, maxLen);
+        var result = Compute.Get(aidx, maxLen + 1);
         
         Compute.Call(aidx, AddKernel, maxLen, sums, acceleratedA, acceleratedB);
         Compute.Call(aidx, AddReductionKernel, 1, result, sums);

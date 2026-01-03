@@ -35,7 +35,7 @@ public partial class SecureBigInteger
         var maxLen = Math.Max(acceleratedA.TotalSize, acceleratedB.TotalSize);;
         var result = Compute.Get(aidx, maxLen);
     
-        Compute.Call(aidx, ConditionalSelectKernel, maxLen, result, acceleratedCondition, acceleratedA, acceleratedB);
+        Compute.Call(aidx, SelectKernel, maxLen, result, acceleratedCondition, acceleratedA, acceleratedB);
     
         return new(result);
     }
@@ -46,7 +46,7 @@ public partial class SecureBigInteger
         ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>> ConditionalSelectKernel { get; } = new((index, result, condition, a, b) =>
+        ArrayView1D<float, Stride1D.Dense>>> SelectKernel { get; } = new((index, result, condition, a, b) =>
     {
         var cond = condition[0].AsUInt();
         var aVal = CryptographicOperations.ConstantTime.TryGetLimb(a, index, 0);

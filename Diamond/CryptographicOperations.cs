@@ -93,12 +93,12 @@ public static class CryptographicOperations
     {
         public static uint ExtractUpperBits(ulong value) => (uint)(value >> 32);
         public static uint ExtractOverflowBit(ulong value) => (uint)(value >> 32 & 1);
-        
         public static uint IsPositive(int value) => (uint)(-value >> 31) & 1;
-
         public static uint GreaterThan(int a, int b) => IsPositive(a - b);
-
-        public static uint IsNonZero(int value) => (uint)((value | -value) >> 31 & 1);
+        public static uint IsNonZero(uint value) => (uint)((value | -value) >> 31 & 1);
+        public static uint IsZero(uint value) => ~IsNonZero(value);
+        public static uint Not(uint value) => ~value;
+        
 
         public static ulong DetectAdditionOverflow(ulong a, ulong b, ulong sum) => (a & b | (a | b) & ~sum) >> 63;
 
@@ -127,6 +127,44 @@ public static class CryptographicOperations
         public static void Copy(uint[] source, int sourceIndex, uint[] dest, int destIndex, int length)
         {
             for (int i = 0; i < length; i++) dest[destIndex + i] = source[sourceIndex + i];
+        }
+
+        public static int CountTrailingZeros(uint[] limbs)
+        {
+            var count = 0;
+            var foundNonZero = 0U;
+
+            for (int i = 0; i < limbs.Length; i++)
+            {
+                var limbTrailing = LimbCountTrailingZeros(limbs[i]);
+                var limbIsZero = IsZero(limbs[i]);
+                var contribution = Select(limbIsZero, 32U, limbTrailing);
+                var toAdd = Select(foundNonZero, 0U, contribution);
+                count += (int)toAdd;
+                var limbIsNonZero = IsNonZero(limbs[i]);
+                foundNonZero |= limbIsNonZero;
+            }
+
+            return count;
+        }
+
+        private static uint LimbCountTrailingZeros(uint value)
+        {
+            var count = 0U;
+            var stopCounting = 0U;
+            
+            for (int bit = 0; bit < 32; bit++)
+            {
+                var bitIsZero = IsZero(value & 1);
+                var shouldIncrement = bitIsZero & ~stopCounting;
+                count += shouldIncrement;
+
+                var bitIsOne = IsNonZero(value & 1);
+                stopCounting |= bitIsOne;
+                value >>= 1;
+            }
+            
+            return count;
         }
     }
     #endregion
