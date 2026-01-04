@@ -45,9 +45,6 @@ public partial class SecureBigInteger
         return result;
     }
 
-    public static int CountTrailingZeros(SecureBigInteger big)
-    {
-        var host = big.AsHost();
-        return CryptographicOperations.ConstantTime.CountTrailingZeros(host);
-    }
+    public static int CountTrailingZeros(SecureBigInteger big) => 
+        CryptographicOperations.ConstantTime.CountTrailingZeros(big._value);
 }

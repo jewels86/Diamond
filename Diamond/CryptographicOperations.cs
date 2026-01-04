@@ -116,13 +116,6 @@ public static class CryptographicOperations
             return Select(inBounds, limbs[(int)index], elseVal);
         }
 
-        public static uint TryGetLimb(ArrayView1D<float, Stride1D.Dense> limbs, int i, uint elseVal)
-        {
-            var inBounds = GreaterThan(limbs.IntExtent, i) & IsNonNegative(i);
-            var index = Select(inBounds, (uint)i, 0);
-            return Select(inBounds, limbs[(int)index].AsUInt(), elseVal);
-        }
-
         public static void TrySetLimb(uint[] limbs, int i, uint value)
         {
             var atZero = limbs[0];

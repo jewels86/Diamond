@@ -6,8 +6,7 @@ public partial class SecureBigInteger
 {
     public static SecureBigInteger ComputeNPrime(SecureBigInteger N, int k)
     {
-        var hostN = N.AsHost();
-        var n0 = hostN[0];
+        var n0 = N[0];
         
         var nPrime = 1UL;
         for (int bits = 2; bits <= 64; bits *= 2)
@@ -32,28 +31,26 @@ public partial class SecureBigInteger
 
     public static SecureBigInteger MontgomeryReduce(SecureBigInteger T, MontgomeryContext ctx)
     {
-        var hostT = T.AsHost();
-        var (hostN, hostNPrime) = (ctx.N.AsHost(), ctx.NPrime.AsHost());
-        var resultLength = hostT.Length + 1;
+        var resultLength = T.Length + 1;
         var result = new uint[resultLength];
         
-        CryptographicOperations.ConstantTime.Copy(hostT, 0, result, 0, hostT.Length);
+        CryptographicOperations.ConstantTime.Copy(T._value, 0, result, 0, T.Length);
     
-        for (int i = 0; i < hostN.Length; i++)
+        for (int i = 0; i < ctx.N.Length; i++)
         {
             var aLow = result[0];
-            var u = aLow * hostNPrime[0];
+            var u = aLow * ctx.NPrime[0];
         
             var carry = 0UL;
-            for (int j = 0; j < hostN.Length; j++)
+            for (int j = 0; j < ctx.N.Length; j++)
             {
-                var product = (ulong)u * hostN[j];
+                var product = (ulong)u * ctx.N[j];
                 var sum = result[i + j] + product + carry;
                 result[i + j] = (uint)sum;
                 carry = sum >> 32;
             }
         
-            result[i + hostN.Length] = (uint)carry;
+            result[i + ctx.N.Length] = (uint)carry;
         
             for (int k = 0; k < resultLength - 1; k++) result[k] = result[k + 1];
             result[resultLength - 1] = 0;
@@ -61,13 +58,13 @@ public partial class SecureBigInteger
     
         var resultBig = new SecureBigInteger(result);
         resultBig = Select(resultBig >= ctx.N, resultBig - ctx.N, resultBig);
-        resultBig = Copy(resultBig, 0, 0, hostN.Length);
+        resultBig = Copy(resultBig, 0, 0, ctx.N.Length);
 
         return resultBig;
     }
 }
 
-public class MontgomeryContext : IDisposable
+public class MontgomeryContext
 {
     public SecureBigInteger N { get; }
     public SecureBigInteger NPrime { get; }
@@ -86,12 +83,4 @@ public class MontgomeryContext : IDisposable
     public SecureBigInteger FromMontgomery(SecureBigInteger big) => SecureBigInteger.MontgomeryReduce(big, this);
 
     public SecureBigInteger Multiply(SecureBigInteger a, SecureBigInteger b) => SecureBigInteger.MontgomeryReduce(a * b, this);
-
-
-    public void Dispose()
-    {
-        N.Dispose();
-        NPrime.Dispose();
-        R.Dispose();
-    }
 }
