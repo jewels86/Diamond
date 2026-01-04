@@ -13,40 +13,51 @@ public partial class SecureBigInteger
     public static (SecureBigInteger quotient, SecureBigInteger remainder) HostDivide(SecureBigInteger a, SecureBigInteger b)
     {
         var (hostA, hostB) = (a.AsHost(), b.AsHost());
-        var quotient = new uint[Math.Max(1, hostA.Length - hostB.Length + 1)];
-        var remainder = new uint[hostA.Length];
-    
+        
+        var maxQuotientLength = Math.Max(1, hostA.Length - hostB.Length + 1);
+        var maxRemainderLength = Math.Max(hostA.Length, hostB.Length);
+        var quotient = new uint[maxQuotientLength];
+        var remainder = new uint[maxRemainderLength]; 
+
         CryptographicOperations.ConstantTime.Copy(hostA, 0, remainder, 0, hostA.Length);
-    
-        for (int i = hostA.Length - 1; i >= hostB.Length - 1; i--)
+
+        for (int i = hostA.Length - hostB.Length; i >= 0; i--)
         {
-            var topRemainder = (ulong)remainder[i] << 32 | remainder[i - 1];
-            var topDivisor = hostB[^1];
-            var qEstimate = (uint)(topRemainder / topDivisor);
+            var highLimb = CryptographicOperations.ConstantTime.TryGetLimb(remainder, i + hostB.Length, 0);
+            var lowLimb = CryptographicOperations.ConstantTime.TryGetLimb(remainder, i + hostB.Length - 1, 0);
+            var topRemainder = (ulong)highLimb << 32 | lowLimb;
+            var topDivisor = CryptographicOperations.ConstantTime.TryGetLimb(hostB, hostB.Length - 1, 1);
+            var qEstimate = (uint)Math.Min(topRemainder / topDivisor, uint.MaxValue);
 
             var borrow = 0UL;
-            for (int j = 0; j < b.Length; j++)
+            for (int j = 0; j < hostB.Length; j++)
             {
-                var product = (ulong)qEstimate * hostB[j];
-                var diff = (ulong)remainder[i - hostB.Length + 1 + j] - (uint)product - borrow;
-                remainder[i - hostB.Length + 1 + j] = (uint)diff;
-                borrow = (product >> 32) + (diff >> 32 & 1);
+                var product = (ulong)qEstimate * CryptographicOperations.ConstantTime.TryGetLimb(hostB, j, 0);
+                var currentRemainder = CryptographicOperations.ConstantTime.TryGetLimb(remainder, i + j, 0);
+                var diff = (ulong)currentRemainder - (uint)product - borrow;
+                
+                CryptographicOperations.ConstantTime.TrySetLimb(remainder, i + j, (uint)diff);
+                borrow = (product >> 32) + (diff >> 63);
             }
 
             var overestimated = (uint)(-(long)borrow >> 63) & 1;
             var correctedQ = qEstimate - overestimated;
-            quotient[i - hostB.Length + 1] = correctedQ;
+            CryptographicOperations.ConstantTime.TrySetLimb(quotient, i, correctedQ);
 
             var carry = 0UL;
             for (int j = 0; j < hostB.Length; j++)
             {
-                var bValue = CryptographicOperations.ConstantTime.Select(overestimated, hostB[j], 0U);
-                var sum = (ulong)remainder[i - hostB.Length + 1 + j] + bValue + carry;
-                remainder[i - hostB.Length + 1 + j] = (uint)sum;
+                var bValue = CryptographicOperations.ConstantTime.Select(overestimated, CryptographicOperations.ConstantTime.TryGetLimb(hostB, j, 0), 0U);
+                var currentRemainder = CryptographicOperations.ConstantTime.TryGetLimb(remainder, i + j, 0);
+                var sum = (ulong)currentRemainder + bValue + carry;
+                
+                if (i + j < remainder.Length)
+                    remainder[i + j] = (uint)sum;
+                
                 carry = sum >> 32;
             }
         }
-    
+
         return (new(quotient), new(remainder));
     }
     #endregion

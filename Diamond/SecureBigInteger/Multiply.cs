@@ -52,7 +52,7 @@ public partial class SecureBigInteger
         
         var products = Compute.Get(aidx, totalProducts * 2);
         var reduced = Compute.Get(aidx, resultSize * 2);
-        var result = Compute.Get(aidx, resultSize);
+        var result = Compute.Get(aidx, resultSize + 1);
         
         Compute.Call(aidx, MultiplyKernel, totalProducts, products, acceleratedA, acceleratedB);
         Compute.Call(aidx, MultiplyReductionKernel, resultSize, reduced, products, acceleratedA.TotalSize, acceleratedB.TotalSize);

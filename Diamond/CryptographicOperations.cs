@@ -94,6 +94,7 @@ public static class CryptographicOperations
         public static uint ExtractUpperBits(ulong value) => (uint)(value >> 32);
         public static uint ExtractOverflowBit(ulong value) => (uint)(value >> 32 & 1);
         public static uint IsPositive(int value) => (uint)(-value >> 31) & 1;
+        public static uint IsNonNegative(int value) => ~(uint)(value >> 31) & 1;
         public static uint GreaterThan(int a, int b) => IsPositive(a - b);
         public static uint IsNonZero(uint value) => (uint)((value | -value) >> 31 & 1);
         public static uint IsZero(uint value) => ~IsNonZero(value);
@@ -108,20 +109,26 @@ public static class CryptographicOperations
             return a & mask | b & ~mask;
         }
 
-        public static uint TryGetLimb(ArrayView1D<float, Stride1D.Dense> limbs, int i, uint elseVal)
-        {
-            var diff = limbs.IntExtent - i - 1;
-            var hasI = (uint)(~diff >> 31) & 1;
-            var index = Select(hasI, (uint)i, 0);
-            return Select(hasI, limbs[(int)index].AsUInt(), elseVal);
-        }
-
         public static uint TryGetLimb(uint[] limbs, int i, uint elseVal)
         {
-            var diff = limbs.Length - i - 1;
-            var hasI = (uint)(~diff >> 31) & 1;
-            var index = Select(hasI, (uint)i, 0);
-            return Select(hasI, limbs[(int)index], elseVal);
+            var inBounds = GreaterThan(limbs.Length, i) & IsNonNegative(i);
+            var index = Select(inBounds, (uint)i, 0);
+            return Select(inBounds, limbs[(int)index], elseVal);
+        }
+
+        public static uint TryGetLimb(ArrayView1D<float, Stride1D.Dense> limbs, int i, uint elseVal)
+        {
+            var inBounds = GreaterThan(limbs.IntExtent, i) & IsNonNegative(i);
+            var index = Select(inBounds, (uint)i, 0);
+            return Select(inBounds, limbs[(int)index].AsUInt(), elseVal);
+        }
+
+        public static void TrySetLimb(uint[] limbs, int i, uint value)
+        {
+            var atZero = limbs[0];
+            var inBounds = GreaterThan(limbs.Length, i) & IsNonNegative(i);
+            var index = Select(inBounds, (uint)i, 0);
+            limbs[(int)index] = Select(inBounds, value, atZero);
         }
         
         public static void Copy(uint[] source, int sourceIndex, uint[] dest, int destIndex, int length)

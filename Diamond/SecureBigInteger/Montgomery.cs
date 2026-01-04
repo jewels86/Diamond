@@ -17,7 +17,7 @@ public partial class SecureBigInteger
             nPrime = nPrime * (2 - temp) & mask;
         }
         
-        var limbCount = (k + 31) / 32;
+        var limbCount = Math.Max(2, (k + 31) / 32);
         var result = new uint[limbCount];
         result[0] = (uint)nPrime;
     

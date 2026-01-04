@@ -9,5 +9,10 @@ class Program
         //HashingTests.TestSHA256();
         //HashingTests.TestSHA512();
         //HashingTests.TestMD5();
+        
+        //BigIntTests.TestAdd();        working!
+        //BigIntTests.TestSubtract();   working!
+        //BigIntTests.TestMultiply();   working!
+        BigIntTests.TestMonty();
     }
 }

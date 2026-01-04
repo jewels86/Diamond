@@ -1,4 +1,5 @@
-﻿using ILGPU;
+﻿using System.Text;
+using ILGPU;
 using ILGPU.Runtime;
 using Jewels.Lazulite;
 
@@ -24,6 +25,15 @@ public partial class SecureBigInteger : IDisposable
     }
     public SecureBigInteger(float[] value) : this(value.AsUInts()) { }
     public SecureBigInteger(uint value) : this([value]) { }
+
+    public SecureBigInteger(ulong value)
+    {
+        _host = new uint[2];
+        var asFloats = value.AsFloats();
+        _host[0] = asFloats.low.AsUInt();
+        _host[1] = asFloats.high.AsUInt();
+        Length = 2;
+    }
     #endregion
 
     #region Properties
@@ -45,13 +55,27 @@ public partial class SecureBigInteger : IDisposable
         return _accelerated!;
     }
 
-    private void ToHost() => _host = _accelerated!.ToHost().AsUInts();
-    private void ToAccelerated() => _accelerated = new(_host!.AsFloats(), Compute.RequestOptimalAccelerator());
+    public void ToHost() => _host = _accelerated!.ToHost().AsUInts();
+    public void ToAccelerated() => _accelerated = new(_host!.AsFloats(), Compute.RequestOptimalAccelerator());
     
     private static T UseOptimal<T>(Func<T> accelerated, Func<T> host, params SecureBigInteger[] bigs) => 
         bigs.Any(b => b.Length > OptimalLimbThreshold) ? accelerated() : host();
     
     public void Dispose() => _accelerated?.Dispose();
+    
+    public override string ToString()
+    {
+        AsHost();
+        int firstNonZero = _host!.Length - 1;
+        while (firstNonZero > 0 && _host![firstNonZero] == 0) firstNonZero--;
+    
+        var sb = new StringBuilder("0x");
+        sb.Append(_host[firstNonZero].ToString("x"));
+        for (int i = firstNonZero - 1; i >= 0; i--) 
+            sb.Append(_host[i].ToString("x8"));
+    
+        return sb.ToString();
+    }
     #endregion
 
     
