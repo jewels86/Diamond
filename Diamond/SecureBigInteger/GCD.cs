@@ -4,6 +4,13 @@ namespace Diamond;
 
 public partial class SecureBigInteger
 {
+    // !! this is NOT constant time with respect to input structure (trailing zeros leak) !!
+    // because we shift based on the trailing zeros of inputs, the shift times will vary
+    // this is unavoidable because that's just how shifts work- it'll take a different amount of time per shift amount no matter what
+    // you can see this in our ConstantTime.Analytics.Tests.TestGCDEvenVsOdd test
+    // thus please avoid using this on secret values! for most purposes, this is fine because GCD is used on values that aren't runtime secrets
+    // but if you need it to be constant time, you'll need to use a different algorithm
+    // reach out to me! :) we can reimplement with a different algorithm that's constant time
     public static SecureBigInteger GCD(SecureBigInteger a, SecureBigInteger b)
     {
         var x = Copy(a, 0, 0, a.Length);

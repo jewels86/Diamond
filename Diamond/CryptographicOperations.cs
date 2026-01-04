@@ -166,6 +166,24 @@ public static class CryptographicOperations
             
             return count;
         }
+        
+        public static int CountLeadingZeros(uint value)
+        {
+            var count = 0;
+            var stopCounting = 0U;
+    
+            for (int bit = 31; bit >= 0; bit--)
+            {
+                var bitIsZero = IsZero(value >> bit & 1);
+                var shouldIncrement = bitIsZero & ~stopCounting;
+                count += (int)shouldIncrement;
+        
+                var bitIsOne = IsNonZero(value >> bit & 1);
+                stopCounting |= bitIsOne;
+            }
+    
+            return count;
+        }
     }
     #endregion
 }

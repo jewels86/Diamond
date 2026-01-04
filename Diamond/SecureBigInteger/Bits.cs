@@ -6,6 +6,11 @@ namespace Diamond;
 
 public partial class SecureBigInteger
 {
+    public static SecureBigInteger operator &(SecureBigInteger a, SecureBigInteger b) => BitwiseAnd(a, b);
+    public static SecureBigInteger operator |(SecureBigInteger a, SecureBigInteger b) => BitwiseOr(a, b);
+    public static SecureBigInteger operator ^(SecureBigInteger a, SecureBigInteger b) => BitwiseXor(a, b);
+    public static SecureBigInteger operator ~(SecureBigInteger a) => BitwiseNot(a);
+    
     public static uint[] GetBits(SecureBigInteger big)
     {
         var result = new uint[big.BitLength];
@@ -31,7 +36,7 @@ public partial class SecureBigInteger
         for (int i = _value.Length - 1; i >= 0; i--)
         {
             var limbIsNonZero = CryptographicOperations.ConstantTime.IsNonZero(_value[i]);
-            var limbBits = 32 - CountLeadingZeros(_value[i]);
+            var limbBits = 32 - CryptographicOperations.ConstantTime.CountLeadingZeros(_value[i]);
             
             var thisLimbBitLength = i * 32 + limbBits;
             
@@ -44,21 +49,52 @@ public partial class SecureBigInteger
         return bitLength;
     }
     
-    private static int CountLeadingZeros(uint value)
+    public static SecureBigInteger BitwiseAnd(SecureBigInteger a, SecureBigInteger b)
     {
-        var count = 0;
-        var stopCounting = 0U;
+        int maxLen = Math.Max(a.Length, b.Length);
+        var result = new uint[maxLen];
     
-        for (int bit = 31; bit >= 0; bit--)
+        for (int i = 0; i < maxLen; i++)
         {
-            var bitIsZero = CryptographicOperations.ConstantTime.IsZero(value >> bit & 1);
-            var shouldIncrement = bitIsZero & ~stopCounting;
-            count += (int)shouldIncrement;
-        
-            var bitIsOne = CryptographicOperations.ConstantTime.IsNonZero(value >> bit & 1);
-            stopCounting |= bitIsOne;
+            var aVal = a.TryGetLimb(i, 0);
+            var bVal = b.TryGetLimb(i, 0);
+            result[i] = aVal & bVal;
         }
     
-        return count;
+        return result;
+    }
+    public static SecureBigInteger BitwiseOr(SecureBigInteger a, SecureBigInteger b)
+    {
+        int maxLen = Math.Max(a.Length, b.Length);
+        var result = new uint[maxLen];
+    
+        for (int i = 0; i < maxLen; i++)
+        {
+            var aVal = a.TryGetLimb(i, 0);
+            var bVal = b.TryGetLimb(i, 0);
+            result[i] = aVal | bVal;
+        }
+    
+        return result;
+    }
+    public static SecureBigInteger BitwiseXor(SecureBigInteger a, SecureBigInteger b)
+    {
+        int maxLen = Math.Max(a.Length, b.Length);
+        var result = new uint[maxLen];
+    
+        for (int i = 0; i < maxLen; i++)
+        {
+            var aVal = a.TryGetLimb(i, 0);
+            var bVal = b.TryGetLimb(i, 0);
+            result[i] = aVal ^ bVal;
+        }
+    
+        return result;
+    }
+    public static SecureBigInteger BitwiseNot(SecureBigInteger a)
+    {
+        var result = new uint[a.Length];
+        for (int i = 0; i < a.Length; i++) result[i] = ~a[i];
+        return result;
     }
 }

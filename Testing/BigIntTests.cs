@@ -179,16 +179,20 @@ public static class BigIntTests
         var baseBig = new SecureBigInteger(7);
         var exponent = new SecureBigInteger(3);
         var modulus = new SecureBigInteger(13);
-
+        
+        var sw = Stopwatch.StartNew();
         var result = SecureBigInteger.ModPowWithBarrett(baseBig, exponent, modulus);
-        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected 0x5");
+        sw.Stop();
+        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected 0x5 ({sw.ElapsedMilliseconds}ms)");
 
         baseBig = new SecureBigInteger(5);
         exponent = new SecureBigInteger(10);
         modulus = new SecureBigInteger(221);
         
+        sw = Stopwatch.StartNew();
         result = SecureBigInteger.ModPowWithBarrett(baseBig, exponent, modulus);
-        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected {BigInteger.ModPow(5, 10, 221)}");
+        sw.Stop();
+        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected {BigInteger.ModPow(5, 10, 221)} ({sw.ElapsedMilliseconds}ms)");
     }
     #endregion
     #region Monty
@@ -217,18 +221,23 @@ public static class BigIntTests
         var exponent = new SecureBigInteger(3);
         var modulus = new SecureBigInteger(13);
 
+        var sw = Stopwatch.StartNew();
         result = SecureBigInteger.ModPowWithMontgomery(baseBig, exponent, modulus);
-        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected 0x5");
+        sw.Stop();
+        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected 0x5 ({sw.ElapsedMilliseconds}ms)");
 
         baseBig = new SecureBigInteger(5);
         exponent = new SecureBigInteger(10);
         modulus = new SecureBigInteger(221);
         
+        sw = Stopwatch.StartNew();
         result = SecureBigInteger.ModPowWithMontgomery(baseBig, exponent, modulus);
-        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected {BigInteger.ModPow(5, 10, 221)}");
+        sw.Stop();
+        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected {BigInteger.ModPow(5, 10, 221)} ({sw.ElapsedMilliseconds}ms)");
     }
     #endregion
 
+    #region Stupid
     public static void TestStupids()
     {
         var base1 = new SecureBigInteger(BigInteger.Parse("123456789012345678901234567890123456789012345678901234567890"));
@@ -247,6 +256,7 @@ public static class BigIntTests
         Console.WriteLine($"Montgomery (decimal): {new BigInteger(resultMontgomery.ToBytes())}");
         Console.WriteLine($"Expected (decimal):   {expected}");
     }
+    #endregion
     
     public static SecureBigInteger GenerateRandomBigInt(int wordCount)
     {

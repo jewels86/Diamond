@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Reflection.Metadata;
 using Diamond;
 
 namespace Testing;
@@ -19,6 +20,10 @@ class Program
         //BigIntTests.TestGCD();      // working!
         //BigIntTests.TestBarrett();  // working!
         //BigIntTests.TestMonty();    // working!
-        BigIntTests.TestStupids();
+        //BigIntTests.TestStupids();  // working!
+        
+        //ConstantTime.Analytics.TestMontgomeryModPow();    // constant time checked
+        ConstantTime.Analytics.TestGCD();
+        ConstantTime.Analytics.TestGCDEvenVsOdd();
     }
 }

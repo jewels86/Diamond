@@ -22,11 +22,23 @@ public partial class SecureBigInteger
         _value[1] = asFloats.high.AsUInt();
     }
 
-    public SecureBigInteger(BigInteger big)
+    public SecureBigInteger(byte[] bytes)
     {
-        var biggie = FromBytes(big.ToByteArray());
-        _value = biggie._value;
+    
+        var limbCount = (bytes.Length + 3) / 4;
+        var limbs = new uint[limbCount];
+    
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            var limbIndex = i / 4;
+            var byteInLimb = i % 4;
+            limbs[limbIndex] |= (uint)bytes[i] << (byteInLimb * 8);
+        }
+    
+        _value = limbs;
     }
+
+    public SecureBigInteger(BigInteger big) : this(big.ToByteArray()) { }
     #endregion
 
     #region Properties
@@ -86,24 +98,6 @@ public partial class SecureBigInteger
         }
     
         return bytes;
-    }
-
-    public static SecureBigInteger FromBytes(byte[] bytes)
-    {
-        if (bytes.Length == 0)
-            return Zero;
-    
-        var limbCount = (bytes.Length + 3) / 4;
-        var limbs = new uint[limbCount];
-    
-        for (int i = 0; i < bytes.Length; i++)
-        {
-            var limbIndex = i / 4;
-            var byteInLimb = i % 4;
-            limbs[limbIndex] |= (uint)bytes[i] << (byteInLimb * 8);
-        }
-    
-        return new SecureBigInteger(limbs);
     }
     #endregion
     

@@ -11,23 +11,19 @@ public partial class SecureBigInteger
 
     public static SecureBigInteger BarrettReduce(SecureBigInteger a, SecureBigInteger n, SecureBigInteger mu)
     {
-        //Console.WriteLine($"Before reduce: a.BitLength = {a.BitLength}");
         var k = n.LogicalBitLength();
         var q = a * mu >> 2 * k;
-        //Console.WriteLine($"q = {q}");
         var r = a - q * n;
 
-        //Console.WriteLine($"r before conditional = {r}");
         r = Select(r >= n, r - n, r);
         r = Select(r >= n, r - n, r);
-        //Console.WriteLine($"After reduce: r.BitLength = {r.BitLength}, r = {r}");
 
         return Trim(r, n.Length); 
     }
     
-    public static SecureBigInteger ModPowWithBarrett(SecureBigInteger baseValue, SecureBigInteger exponent, SecureBigInteger modulus)
+    public static SecureBigInteger ModPowWithBarrett(SecureBigInteger baseValue, SecureBigInteger exponent, SecureBigInteger modulus, SecureBigInteger? mu = null)
     {
-        var mu = ComputeBarrettMu(modulus);
+        mu ??= ComputeBarrettMu(modulus);
     
         var result = Copy(One);
         var baseBig = BarrettReduce(baseValue, modulus, mu);

@@ -45,9 +45,9 @@ public partial class SecureBigInteger
         return Trim(m, ctx.N.Length);
     }
     
-    public static SecureBigInteger ModPowWithMontgomery(SecureBigInteger baseValue, SecureBigInteger exponent, SecureBigInteger modulus)
+    public static SecureBigInteger ModPowWithMontgomery(SecureBigInteger baseValue, SecureBigInteger exponent, SecureBigInteger modulus, MontgomeryContext? ctx = null)
     {
-        var ctx = new MontgomeryContext(modulus);
+        ctx ??= new MontgomeryContext(modulus);
     
         var baseMont = ctx.ToMontgomery(baseValue);
         var resultMont = ctx.ToMontgomery(One);
