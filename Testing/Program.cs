@@ -1,6 +1,7 @@
 ﻿using System.Numerics;
 using System.Reflection.Metadata;
 using Diamond;
+using Jewels.Lazulite;
 
 namespace Testing;
 
@@ -22,7 +23,7 @@ class Program
         //BigIntTests.TestMonty();    // working!
         //BigIntTests.TestStupids();  // working!
         
-        //ConstantTime.Analytics.TestMontgomeryModPow();    // constant time checked
+        ConstantTime.Analytics.TestMontgomeryModPow();    // constant time checked
         ConstantTime.Analytics.TestGCD();
         ConstantTime.Analytics.TestGCDEvenVsOdd();
     }

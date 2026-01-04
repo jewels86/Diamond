@@ -99,9 +99,6 @@ public static class CryptographicOperations
         public static uint IsNonZero(uint value) => (uint)((value | -value) >> 31 & 1);
         public static uint IsZero(uint value) => 1 - IsNonZero(value);
         public static uint Not(uint value) => 1 - value;
-        
-
-        public static ulong DetectAdditionOverflow(ulong a, ulong b, ulong sum) => (a & b | (a | b) & ~sum) >> 63;
 
         public static uint Select(uint condition, uint a, uint b)
         {

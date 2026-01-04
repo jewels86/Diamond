@@ -14,17 +14,9 @@ public partial class SecureBigInteger
     public SecureBigInteger(uint[] value) => _value = value;
     public SecureBigInteger(float[] value) : this(value.AsUInts()) { }
     public SecureBigInteger(uint value) : this([value]) { }
-    public SecureBigInteger(ulong value)
-    {
-        _value = new uint[2];
-        var asFloats = value.AsFloats();
-        _value[0] = asFloats.low.AsUInt();
-        _value[1] = asFloats.high.AsUInt();
-    }
 
     public SecureBigInteger(byte[] bytes)
     {
-    
         var limbCount = (bytes.Length + 3) / 4;
         var limbs = new uint[limbCount];
     
