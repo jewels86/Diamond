@@ -1,4 +1,5 @@
-﻿using Diamond;
+﻿using System.Numerics;
+using Diamond;
 
 namespace Testing;
 
@@ -10,9 +11,14 @@ class Program
         //HashingTests.TestSHA512();
         //HashingTests.TestMD5();
         
-        //BigIntTests.TestAdd();        working!
-        //BigIntTests.TestSubtract();   working!
-        //BigIntTests.TestMultiply();   working!
-        BigIntTests.TestMonty();
+        //BigIntTests.TestAdd();      // working!
+        //BigIntTests.TestSubtract(); // working!
+        //BigIntTests.TestMultiply(); // working!
+        //BigIntTests.TestDivide();   // working!
+        //BigIntTests.TestMod();      // working!
+        //BigIntTests.TestGCD();      // working!
+        //BigIntTests.TestBarrett();  // working!
+        //BigIntTests.TestMonty();    // working!
+        BigIntTests.TestStupids();
     }
 }

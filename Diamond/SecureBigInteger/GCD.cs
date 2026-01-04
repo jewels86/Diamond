@@ -38,7 +38,7 @@ public partial class SecureBigInteger
         }
     
         var result = x << commonShift;
-    
+        
         result = Select(a == Zero, b, result);
         result = Select(b == Zero, a, result);
     

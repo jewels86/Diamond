@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Numerics;
 using Diamond;
 
 namespace Testing;
@@ -10,160 +11,242 @@ public static class BigIntTests
     #region Add/Subtract
     public static void TestAdd()
     {
-        Console.WriteLine("Testing add...");
+        var a = new SecureBigInteger(43);
+        var b = new SecureBigInteger(12);
         
-        // simple host case
-        using var a1 = new SecureBigInteger(12);
-        using var a2 = new SecureBigInteger(38);
-
         var sw = Stopwatch.StartNew();
-        using var result = SecureBigInteger.HostAdd(a1, a2);
+        var result = a + b;
         sw.Stop();
-        Console.WriteLine($"simple host add: a1: {a1}, a2: {a2}, result: {result} ({sw.ElapsedMilliseconds}ms)");
-        
-        // larger host case
-        using var b1 = GenerateRandomBigInt(20);
-        using var b2 = GenerateRandomBigInt(10);
+        Console.WriteLine($"simple addition: {a} + {b} = {result}, took {sw.ElapsedMilliseconds}ms");
+
+        a = GenerateRandomBigInt(20);
+        b = GenerateRandomBigInt(10);
         
         sw = Stopwatch.StartNew();
-        using var result2 = SecureBigInteger.HostAdd(b1, b2);
+        result = a + b;
         sw.Stop();
-        Console.WriteLine($"larger host add: b1: {b1}, b2: {b2}, result: {result2} ({sw.ElapsedMilliseconds}ms)");
+        Console.WriteLine($"larger addition: {a} + {b} = {result}, took {sw.ElapsedMilliseconds}ms");
         
-        // simple accelerated case
-        a1.ToAccelerated();
-        a2.ToAccelerated();
+        a = GenerateRandomBigInt(1000);
+        b = GenerateRandomBigInt(1000);
         
         sw = Stopwatch.StartNew();
-        using var result3 = SecureBigInteger.AcceleratedAdd(a1, a2);
+        result = a + b;
         sw.Stop();
-        Console.WriteLine($"simple accelerated add: a1: {a1}, a2: {a2}, result: {result3} ({sw.ElapsedMilliseconds}ms)");
-        
-        // larger accelerated case
-        b1.ToAccelerated();
-        b2.ToAccelerated();
-        
-        sw = Stopwatch.StartNew();
-        using var result4 = SecureBigInteger.AcceleratedAdd(b1, b2);
-        sw.Stop();
-        Console.WriteLine($"larger accelerated add: b1: {b1}, b2: {b2}, result: {result4} ({sw.ElapsedMilliseconds}ms)");
+        Console.WriteLine($"huge addition with size {a.Length} + size {b.Length} took {sw.ElapsedMilliseconds}ms");
     }
 
     public static void TestSubtract()
     {
-        Console.WriteLine("Testing subtract...");
+        var a = new SecureBigInteger(43);
+        var b = new SecureBigInteger(12);
         
-        // simple host case
-        using var a1 = new SecureBigInteger(12);
-        using var a2 = new SecureBigInteger(38);
-
         var sw = Stopwatch.StartNew();
-        using var result = SecureBigInteger.HostSubtract(a1, a2);
+        var result = a - b;
         sw.Stop();
-        Console.WriteLine($"simple host subtract: a1: {a1}, a2: {a2}, result: {result} ({sw.ElapsedMilliseconds}ms)");
+        Console.WriteLine($"simple subtraction: {a} - {b} = {result}, took {sw.ElapsedMilliseconds}ms");
         
-        // larger host case
-        using var b1 = GenerateRandomBigInt(20);
-        using var b2 = GenerateRandomBigInt(10);
+        a = GenerateRandomBigInt(20);
+        b = GenerateRandomBigInt(10);
         
         sw = Stopwatch.StartNew();
-        using var result2 = SecureBigInteger.HostSubtract(b1, b2);
+        result = a - b;
         sw.Stop();
-        Console.WriteLine($"larger host subtract: b1: {b1}, b2: {b2}, result: {result2} ({sw.ElapsedMilliseconds}ms)");
+        Console.WriteLine($"larger subtraction: {a} - {b} = {result}, took {sw.ElapsedMilliseconds}ms");
         
-        // simple accelerated case
-        a1.ToAccelerated();
-        a2.ToAccelerated();
+        a = GenerateRandomBigInt(1000);
+        b = GenerateRandomBigInt(1000);
         
         sw = Stopwatch.StartNew();
-        using var result3 = SecureBigInteger.AcceleratedSubtract(a1, a2);
+        result = a - b;
         sw.Stop();
-        Console.WriteLine($"simple accelerated subtract: a1: {a1}, a2: {a2}, result: {result3} ({sw.ElapsedMilliseconds}ms)");
-        
-        // larger accelerated case
-        b1.ToAccelerated();
-        b2.ToAccelerated();
-        
-        sw = Stopwatch.StartNew();
-        using var result4 = SecureBigInteger.AcceleratedSubtract(b1, b2);
-        sw.Stop();
-        Console.WriteLine($"larger accelerated subtract: b1: {b1}, b2: {b2}, result: {result4} ({sw.ElapsedMilliseconds}ms)");
+        Console.WriteLine($"huge subtraction with size {a.Length} - size {b.Length} took {sw.ElapsedMilliseconds}ms");
     }
     #endregion
-    #region Multiply
+    #region Multiply/Divide/Mod
     public static void TestMultiply()
     {
-        Console.WriteLine("Testing multiply...");
+        var a = new SecureBigInteger(43);
+        var b = new SecureBigInteger(12);
+        
+        var sw = Stopwatch.StartNew();
+        var result = a * b;
+        sw.Stop();
+        Console.WriteLine($"simple multiplication: {a} * {b} = {result}, took {sw.ElapsedMilliseconds}ms");
+        
+        a = GenerateRandomBigInt(20);
+        b = GenerateRandomBigInt(10);
+        
+        sw = Stopwatch.StartNew();
+        result = a * b;
+        sw.Stop();
+        Console.WriteLine($"larger multiplication: {a} * {b} = {result}, took {sw.ElapsedMilliseconds}ms");
+        
+        a = GenerateRandomBigInt(1000);
+        b = GenerateRandomBigInt(1000);
+        
+        sw = Stopwatch.StartNew();
+        result = a * b;
+        sw.Stop();
+        Console.WriteLine($"huge multiplication with size {a.Length} * size {b.Length} took {sw.ElapsedMilliseconds}ms");
+    }
 
-        // simple host case
-        using var a1 = new SecureBigInteger(12);
-        using var a2 = new SecureBigInteger(38);
+    public static void TestDivide()
+    {
+        var a = new SecureBigInteger(43);
+        var b = new SecureBigInteger(12);
+        
+        var sw = Stopwatch.StartNew();
+        var result = a / b;
+        sw.Stop();
+        Console.WriteLine($"simple division: {a} / {b} = {result}, took {sw.ElapsedMilliseconds}ms");
+        
+        a = GenerateRandomBigInt(20);
+        b = GenerateRandomBigInt(10);
+        
+        sw = Stopwatch.StartNew();
+        result = a / b;
+        sw.Stop();
+        Console.WriteLine($"larger division: {a} / {b} = {result}, took {sw.ElapsedMilliseconds}ms");
+        
+        a = GenerateRandomBigInt(128);
+        b = GenerateRandomBigInt(128);
+        
+        sw = Stopwatch.StartNew();
+        result = a / b;
+        sw.Stop();
+        Console.WriteLine($"big division with size {a.Length} / size {b.Length} took {sw.ElapsedMilliseconds}ms");
+    }
+
+    public static void TestMod()
+    {
+        var a = new SecureBigInteger(43);
+        var b = new SecureBigInteger(12);
+        
+        var sw = Stopwatch.StartNew();
+        var result = a % b;
+        sw.Stop();
+        Console.WriteLine($"simple modulus: {a} % {b} = {result}, took {sw.ElapsedMilliseconds}ms");
+        
+        a = GenerateRandomBigInt(20);
+        b = GenerateRandomBigInt(10);
+        
+        sw = Stopwatch.StartNew();
+        result = a % b;
+        sw.Stop();
+        Console.WriteLine($"larger modulus: {a} % {b} = {result}, took {sw.ElapsedMilliseconds}ms");
+        
+        a = GenerateRandomBigInt(128);
+        b = GenerateRandomBigInt(128);
+        
+        sw = Stopwatch.StartNew();
+        result = a % b;
+        sw.Stop();
+        Console.WriteLine($"big modulus with size {a.Length} % size {b.Length} took {sw.ElapsedMilliseconds}ms");
+    }
+    #endregion
+    #region GCD
+    public static void TestGCD()
+    {
+        var a = new SecureBigInteger(48);
+        var b = new SecureBigInteger(18);
 
         var sw = Stopwatch.StartNew();
-        using var result = SecureBigInteger.HostMultiply(a1, a2);
+        var result = SecureBigInteger.GCD(a, b);
         sw.Stop();
-        Console.WriteLine($"simple host multiply: a1: {a1}, a2: {a2}, result: {result} ({sw.ElapsedMilliseconds}ms)");
+        Console.WriteLine($"GCD({a}, {b}) = {result}, took {sw.ElapsedMilliseconds}ms");
 
-        // larger host case
-        using var b1 = GenerateRandomBigInt(20);
-        using var b2 = GenerateRandomBigInt(10);
+        a = new SecureBigInteger(101);
+        b = new SecureBigInteger(103);
+        
+        sw = Stopwatch.StartNew();
+        result = SecureBigInteger.GCD(a, b);
+        sw.Stop();
+        Console.WriteLine($"GCD({a}, {b}) = {result}, took {sw.ElapsedMilliseconds}ms");
+        
+        a = GenerateRandomBigInt(20);
+        b = GenerateRandomBigInt(10);
+        
+        sw = Stopwatch.StartNew();
+        result = SecureBigInteger.GCD(a, b);
+        sw.Stop();
+        Console.WriteLine($"GCD({a}, {b}) = {result}, took {sw.ElapsedMilliseconds}ms");
+    }
+    #endregion
+    #region Barrett
+    public static void TestBarrett()
+    {
+        var baseBig = new SecureBigInteger(7);
+        var exponent = new SecureBigInteger(3);
+        var modulus = new SecureBigInteger(13);
 
-        sw = Stopwatch.StartNew();
-        using var result2 = SecureBigInteger.HostMultiply(b1, b2);
-        sw.Stop();
-        Console.WriteLine($"larger host multiply: b1: {b1}, b2: {b2}, result: {result2} ({sw.ElapsedMilliseconds}ms)");
+        var result = SecureBigInteger.ModPowWithBarrett(baseBig, exponent, modulus);
+        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected 0x5");
+
+        baseBig = new SecureBigInteger(5);
+        exponent = new SecureBigInteger(10);
+        modulus = new SecureBigInteger(221);
         
-        // simple accelerated case
-        a1.ToAccelerated();
-        a2.ToAccelerated();
-        
-        sw = Stopwatch.StartNew();
-        using var result3 = SecureBigInteger.AcceleratedMultiply(a1, a2);
-        sw.Stop();
-        Console.WriteLine($"simple accelerated multiply: a1: {a1}, a2: {a2}, result: {result3} ({sw.ElapsedMilliseconds}ms)");
-        
-        // larger accelerated case
-        b1.ToAccelerated();
-        b2.ToAccelerated();
-        
-        sw = Stopwatch.StartNew();
-        using var result4 = SecureBigInteger.AcceleratedMultiply(b1, b2);
-        sw.Stop();
-        Console.WriteLine($"larger accelerated multiply: b1: {b1}, b2: {b2}, result: {result4} ({sw.ElapsedMilliseconds}ms)");
+        result = SecureBigInteger.ModPowWithBarrett(baseBig, exponent, modulus);
+        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected {BigInteger.ModPow(5, 10, 221)}");
     }
     #endregion
     #region Monty
     public static void TestMonty()
     {
-        var test1 = new SecureBigInteger(43);
-        var test2 = new SecureBigInteger(0x100000000);
-        var product2 = test1 * test2;
-        Console.WriteLine($"43 * 2^32 = {product2}");
-        
-        var test3 = new SecureBigInteger(0x2b00000000);
-        var test4 = new SecureBigInteger(12);
-        var mod = test3 % test4;
-        Console.WriteLine($"0x2b00000000 % 12 = {mod}");
-        
-        Console.WriteLine("Testing monty things...");
+        var n = new SecureBigInteger(13);
+        var ctx = new MontgomeryContext(n);
 
-        using var n1 = new SecureBigInteger(12);
-        using var ctx1 = new MontgomeryContext(n1);
-        using var a1 = new SecureBigInteger(43);
-        using var a2 = new SecureBigInteger(22);
+        Console.WriteLine($"N = {n}");
+        Console.WriteLine($"K = {ctx.K}");
+        Console.WriteLine($"R = {ctx.R}");
+        Console.WriteLine($"N' = {ctx.NPrime}");
+        
+        var a = new SecureBigInteger(7);
+        var aMont = ctx.ToMontgomery(a);
+        var aBack = ctx.FromMontgomery(aMont);
+        Console.WriteLine($"a = {a}, in Montgomery = {aMont}, back = {aBack}");
 
-        using var a1Mont = ctx1.ToMontgomery(a1);
-        using var a2Mont = ctx1.ToMontgomery(a2);
-        using var a1Back = ctx1.FromMontgomery(a1Mont);
-        using var a2Back = ctx1.FromMontgomery(a2Mont);
+        var b = new SecureBigInteger(5);
+        var bMont = ctx.ToMontgomery(b);
+        var resultMont = ctx.Multiply(aMont, bMont);
+        var result = ctx.FromMontgomery(resultMont);
+        Console.WriteLine($"{a} * {b} mod {n} = {result}, expected 0x9");
         
-        using var product = ctx1.Multiply(a1Mont, a2Mont);
-        using var productBack = ctx1.FromMontgomery(product);
-        using var productModN = a1 * a2 % n1;
+        var baseBig = new SecureBigInteger(7);
+        var exponent = new SecureBigInteger(3);
+        var modulus = new SecureBigInteger(13);
+
+        result = SecureBigInteger.ModPowWithMontgomery(baseBig, exponent, modulus);
+        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected 0x5");
+
+        baseBig = new SecureBigInteger(5);
+        exponent = new SecureBigInteger(10);
+        modulus = new SecureBigInteger(221);
         
-        Console.WriteLine($"a1: {a1}, a2: {a2}, a1Mont: {a1Mont}, a2Mont: {a2Mont}, product: {product}, productBack: {productBack}, a1 * a2 % 12: {productModN}");
+        result = SecureBigInteger.ModPowWithMontgomery(baseBig, exponent, modulus);
+        Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected {BigInteger.ModPow(5, 10, 221)}");
     }
     #endregion
+
+    public static void TestStupids()
+    {
+        var base1 = new SecureBigInteger(BigInteger.Parse("123456789012345678901234567890123456789012345678901234567890"));
+        var exp1 = new SecureBigInteger(65537);
+        var mod1 = new SecureBigInteger(BigInteger.Parse("987654321098765432109876543210987654321098765432109876543211"));
+
+        var resultBarrett = SecureBigInteger.ModPowWithBarrett(base1, exp1, mod1);
+        var resultMontgomery = SecureBigInteger.ModPowWithMontgomery(base1, exp1, mod1);
+        var expected = BigInteger.ModPow(
+            BigInteger.Parse("123456789012345678901234567890123456789012345678901234567890"),
+            65537,
+            BigInteger.Parse("987654321098765432109876543210987654321098765432109876543211")
+        );
+
+        Console.WriteLine($"Barrett (decimal):    {new BigInteger(resultBarrett.ToBytes())}");
+        Console.WriteLine($"Montgomery (decimal): {new BigInteger(resultMontgomery.ToBytes())}");
+        Console.WriteLine($"Expected (decimal):   {expected}");
+    }
     
     public static SecureBigInteger GenerateRandomBigInt(int wordCount)
     {

@@ -20,7 +20,7 @@ public partial class SecureBigInteger
             var carry = 0UL;
             for (int j = 0; j < b.Length; j++)
             {
-                var bVal = b.TryGetLimb(i, 0);
+                var bVal = b.TryGetLimb(j, 0);
                 var product = (ulong)aVal * bVal + result[i + j] + carry;
                 result[i + j] = (uint)product;
                 carry = product >> 32;

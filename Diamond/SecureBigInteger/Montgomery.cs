@@ -7,13 +7,13 @@ public partial class SecureBigInteger
     public static SecureBigInteger ComputeNPrime(SecureBigInteger N, int k)
     {
         var n0 = N[0];
-        
+
         var nPrime = 1UL;
-        for (int bits = 2; bits <= 64; bits *= 2)
+        for (int bits = 2; bits <= 32; bits *= 2)
         {
             var mask = (1UL << bits) - 1;
-            var temp = n0 * nPrime & mask;
-            nPrime = nPrime * (2 - temp) & mask;
+            var temp = (n0 * nPrime) & mask;
+            nPrime = (nPrime * ((2UL - temp) & mask)) & mask;
         }
         
         var limbCount = Math.Max(2, (k + 31) / 32);
@@ -31,36 +31,39 @@ public partial class SecureBigInteger
 
     public static SecureBigInteger MontgomeryReduce(SecureBigInteger T, MontgomeryContext ctx)
     {
-        var resultLength = T.Length + 1;
-        var result = new uint[resultLength];
-        
-        CryptographicOperations.ConstantTime.Copy(T._value, 0, result, 0, T.Length);
+        var m = Copy(T);
     
         for (int i = 0; i < ctx.N.Length; i++)
         {
-            var aLow = result[0];
-            var u = aLow * ctx.NPrime[0];
-        
-            var carry = 0UL;
-            for (int j = 0; j < ctx.N.Length; j++)
-            {
-                var product = (ulong)u * ctx.N[j];
-                var sum = result[i + j] + product + carry;
-                result[i + j] = (uint)sum;
-                carry = sum >> 32;
-            }
-        
-            result[i + ctx.N.Length] = (uint)carry;
-        
-            for (int k = 0; k < resultLength - 1; k++) result[k] = result[k + 1];
-            result[resultLength - 1] = 0;
+            var u_i = m[0] * ctx.NPrime[0];
+            var uN = u_i * ctx.N;
+            m += uN;
+            m >>= 32;
         }
     
-        var resultBig = new SecureBigInteger(result);
-        resultBig = Select(resultBig >= ctx.N, resultBig - ctx.N, resultBig);
-        resultBig = Copy(resultBig, 0, 0, ctx.N.Length);
-
-        return resultBig;
+        m = Select(m >= ctx.N, m - ctx.N, m);
+        return Trim(m, ctx.N.Length);
+    }
+    
+    public static SecureBigInteger ModPowWithMontgomery(SecureBigInteger baseValue, SecureBigInteger exponent, SecureBigInteger modulus)
+    {
+        var ctx = new MontgomeryContext(modulus);
+    
+        var baseMont = ctx.ToMontgomery(baseValue);
+        var resultMont = ctx.ToMontgomery(One);
+    
+        var expBits = GetBits(exponent);
+    
+        for (int i = 0; i < exponent.LogicalBitLength(); i++)
+        {
+            var bit = expBits[i];
+        
+            var temp = ctx.Multiply(resultMont, baseMont);
+            resultMont = Select(bit, temp, resultMont);
+            baseMont = ctx.Multiply(baseMont, baseMont);
+        }
+    
+        return ctx.FromMontgomery(resultMont);
     }
 }
 
@@ -74,7 +77,7 @@ public class MontgomeryContext
     public MontgomeryContext(SecureBigInteger n)
     {
         N = n;
-        K = (n.BitLength + 31) / 32 * 32;
+        K = (n.LogicalBitLength() + 31) / 32 * 32;
         R = SecureBigInteger.One << K;
         NPrime = SecureBigInteger.ComputeNPrime(n, K);
     }

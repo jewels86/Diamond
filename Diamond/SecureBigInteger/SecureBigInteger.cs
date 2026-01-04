@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Numerics;
+using System.Text;
 using ILGPU;
 using ILGPU.Runtime;
 using Jewels.Lazulite;
@@ -19,6 +20,12 @@ public partial class SecureBigInteger
         var asFloats = value.AsFloats();
         _value[0] = asFloats.low.AsUInt();
         _value[1] = asFloats.high.AsUInt();
+    }
+
+    public SecureBigInteger(BigInteger big)
+    {
+        var biggie = FromBytes(big.ToByteArray());
+        _value = biggie._value;
     }
     #endregion
 
@@ -58,6 +65,46 @@ public partial class SecureBigInteger
     }
     
     public static implicit operator SecureBigInteger(uint[] value) => new(value);
+    public static implicit operator SecureBigInteger(uint value) => new(value);
+
+    public byte[] ToBytes()
+    {
+        var lastNonZeroIndex = _value.Length - 1;
+        while (lastNonZeroIndex > 0 && _value[lastNonZeroIndex] == 0)
+            lastNonZeroIndex--;
+    
+        var byteCount = (lastNonZeroIndex + 1) * 4;
+        var bytes = new byte[byteCount];
+    
+        for (int i = 0; i <= lastNonZeroIndex; i++)
+        {
+            var limb = _value[i];
+            bytes[i * 4] = (byte)limb;
+            bytes[i * 4 + 1] = (byte)(limb >> 8);
+            bytes[i * 4 + 2] = (byte)(limb >> 16);
+            bytes[i * 4 + 3] = (byte)(limb >> 24);
+        }
+    
+        return bytes;
+    }
+
+    public static SecureBigInteger FromBytes(byte[] bytes)
+    {
+        if (bytes.Length == 0)
+            return Zero;
+    
+        var limbCount = (bytes.Length + 3) / 4;
+        var limbs = new uint[limbCount];
+    
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            var limbIndex = i / 4;
+            var byteInLimb = i % 4;
+            limbs[limbIndex] |= (uint)bytes[i] << (byteInLimb * 8);
+        }
+    
+        return new SecureBigInteger(limbs);
+    }
     #endregion
     
     #region Static Members & Constants

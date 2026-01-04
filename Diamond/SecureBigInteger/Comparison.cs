@@ -16,7 +16,7 @@ public partial class SecureBigInteger
     public static uint GreaterThan(SecureBigInteger a, SecureBigInteger b) => CryptographicOperations.ConstantTime.Not(a <= b);
     public static uint LessThan(SecureBigInteger a, SecureBigInteger b) => CryptographicOperations.ConstantTime.Not(a >= b);
     
-    public static uint IsEven(SecureBigInteger big) => CryptographicOperations.ConstantTime.Select(big[0] & 1, 1U, 0U);
+    public static uint IsEven(SecureBigInteger big) => CryptographicOperations.ConstantTime.IsZero(big[0] & 1);
     public static uint IsOdd(SecureBigInteger big) => CryptographicOperations.ConstantTime.Not(IsEven(big));
 
 
@@ -43,7 +43,7 @@ public partial class SecureBigInteger
             var isNonZero = CryptographicOperations.ConstantTime.IsNonZero(aVal - bVal);
             equal = CryptographicOperations.ConstantTime.Select(isNonZero, 0U, equal);
         }
-        return 1U;
+        return equal;
     }
 
     public static uint NotEqual(SecureBigInteger a, SecureBigInteger b)
