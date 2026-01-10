@@ -269,23 +269,23 @@ public static class BigIntTests
     public static void TestRQR()
     {
         var sw = Stopwatch.StartNew();
-        var inverse27 = SecureBigInteger.RQR(531, 27);
+        var inverse27 = SecureBigInteger.RMD(531, 27);
         sw.Stop();
-        Console.WriteLine($"RQR(531, 27) = {inverse27} ({sw.ElapsedMilliseconds}ms)");
+        Console.WriteLine($"RMD(531, 27) = {inverse27} ({sw.ElapsedMilliseconds}ms)");
 
         sw = Stopwatch.StartNew();
-        var largeDivision = SecureBigInteger.RQR(new SecureBigInteger(2311567), new SecureBigInteger(14000));
+        var largeDivision = SecureBigInteger.RMD(new SecureBigInteger(2311567), new SecureBigInteger(14000));
         sw.Stop();
-        Console.WriteLine($"RQR(2311567, 14000) = {largeDivision} ({sw.ElapsedMilliseconds}ms)");
+        Console.WriteLine($"RMD(2311567, 14000) = {largeDivision} ({sw.ElapsedMilliseconds}ms)");
         
         var random1 = GenerateRandomBigInt(128);
         var random2 = GenerateRandomBigInt(64);
-        var expected = new BigInteger(random1.ToBytes()) / new BigInteger(random2.ToBytes());
+        var expected = ToPositiveBigInteger(random1) / ToPositiveBigInteger(random2);
         sw = Stopwatch.StartNew();
-        var result = SecureBigInteger.RQR(random1, random2);
+        var result = SecureBigInteger.RMD(random1, random2);
         sw.Stop();
         
-        Console.WriteLine($"Our result:\t {new BigInteger(result.ToBytes())}");
+        Console.WriteLine($"Our result:\t {ToPositiveBigInteger(result)}");
         Console.WriteLine($"Expected:\t {expected}");
         Console.WriteLine($"RQR([128 size], [128 size]) = {sw.ElapsedMilliseconds}ms");
     }
@@ -299,5 +299,16 @@ public static class BigIntTests
         if (result[wordCount - 1] == 0) result[wordCount - 1] = 1;
     
         return new SecureBigInteger(result);
+    }
+    
+    public static BigInteger ToPositiveBigInteger(SecureBigInteger sbi)
+    {
+        var bytes = sbi.ToBytes();
+        if (bytes[^1] < 0x80) return new BigInteger(bytes);
+        
+        var newBytes = new byte[bytes.Length + 1];
+        Array.Copy(bytes, newBytes, bytes.Length);
+        newBytes[bytes.Length] = 0;
+        return new BigInteger(newBytes);
     }
 }

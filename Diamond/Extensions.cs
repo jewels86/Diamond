@@ -8,6 +8,7 @@ public static class Extensions
     public static uint AsUInt(this float val) => Interop.FloatAsInt(val);
     public static ulong AsULong(this float val) => Interop.FloatAsInt(val);
     
+    public static ulong AsUlong(this (uint high, uint low) tuple) => ((ulong)tuple.high << 32) | tuple.low;
     public static ulong AsULong(this (float high, float low) tuple)
     {
         var high = tuple.high.AsUInt();

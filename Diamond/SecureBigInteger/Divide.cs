@@ -32,27 +32,39 @@ public partial class SecureBigInteger
         return (quotient, remainder);
     }
 
-    public static (SecureBigInteger inverseB, int k) ComputeInverseB(SecureBigInteger b, int N = 30)
+    public static (SecureBigInteger inverseB, int scale) ComputeRMInverseB(SecureBigInteger b, int aBitLength)
     {
-        var k = b.LogicalBitLength();
-        var n = Copy(b);
-        n.ClearBit(k);
+        var k = b.LogicalBitLength() - 1;
+        var lowerPower = One << k;
+        var midpoint = lowerPower + (lowerPower >> 1);
+        var usingHigher = b > midpoint;
+        
+        var m = Select(usingHigher, lowerPower << 1, lowerPower);
+        k = (int)CryptographicOperations.ConstantTime.Select(usingHigher, (uint)k + 1, (uint)k);
+        var n = Select(usingHigher, m - b, b - m);
 
-        var s = N * k;
+        var N = Math.Max(aBitLength - b.BitLength, 32);
+        var s = Math.Max(aBitLength, 64);
         var h = n << s - k;
 
-        var inverseBScaled = One << s;
-        inverseBScaled -= h;
+        var invB = One << s;
+        invB = OpAOS(invB, h, 1u ^ usingHigher);
 
+        var sLimbs = (s + 31) / 32;
         var hPow = h;
         for (int i = 2; i < N; i++)
         {
-            hPow = hPow * h >> s;
-            if (CryptographicOperations.ConstantTime.IsEven((uint)i) == 1) inverseBScaled += hPow;
-            else inverseBScaled -= hPow;
+            hPow = OpTMS(hPow, h, s, sLimbs); // Trim(hPow * h >> s, sLimbs)
+            invB = OpAOS(invB, hPow, CryptographicOperations.ConstantTime.IsOdd((uint)i) & (1u ^ usingHigher)); // shouldSubtract ? Subtract(invB, hPow) : Add(invB, hPow)
         }
-        
-        var totalScale = s + k;
-        return (inverseBScaled, totalScale);
+
+        var scale = s + k;
+        return (invB, scale);
+    }
+
+    public static SecureBigInteger RMD(SecureBigInteger a, SecureBigInteger b)
+    {
+        var (invB, scale) = ComputeRMInverseB(b, a.BitLength);
+        return (a * invB) >> scale;
     }
 }

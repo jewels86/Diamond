@@ -11,6 +11,7 @@ public partial class SecureBigInteger
     public static SecureBigInteger operator >>(SecureBigInteger big, int shift) => RightShift(big, shift);
     public static SecureBigInteger LeftShift(SecureBigInteger big, int totalShift)
     {
+        if (totalShift < 0) return RightShift(big, -totalShift);
         var limbShift = totalShift / 32;
         var bitShift = totalShift % 32;
 
@@ -37,6 +38,7 @@ public partial class SecureBigInteger
     
     public static SecureBigInteger RightShift(SecureBigInteger big, int totalShift)
     {
+        if (totalShift < 0) return LeftShift(big, -totalShift);
         var limbShift = totalShift / 32;
         var bitShift = totalShift % 32;
     

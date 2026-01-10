@@ -95,7 +95,7 @@ public static class CryptographicOperations
         public static uint ExtractOverflowBit(ulong value) => (uint)(value >> 32 & 1);
         public static uint IsPositive(int value) => (uint)(-value >> 31) & 1;
         public static uint IsNonNegative(int value) => ~(uint)(value >> 31) & 1;
-        public static uint GreaterThan(int a, int b) => IsPositive(a - b);
+        public static uint GreaterThan(int a, int b) => IsPositive((int)((long)a - b));
         public static uint IsNonZero(uint value) => (uint)((value | -value) >> 31 & 1);
         public static uint IsZero(uint value) => 1 - IsNonZero(value);
         public static uint Not(uint value) => 1 - value;
@@ -105,6 +105,11 @@ public static class CryptographicOperations
         public static uint Select(uint condition, uint a, uint b)
         {
             uint mask = (uint)-(int)condition;
+            return a & mask | b & ~mask;
+        }
+        public static ulong Select(uint condition, ulong a, ulong b)
+        {
+            ulong mask = (ulong)-condition;
             return a & mask | b & ~mask;
         }
 

@@ -30,4 +30,47 @@ public partial class SecureBigInteger
         
         return result;
     }
+
+    public static SecureBigInteger OpTMS(SecureBigInteger a, SecureBigInteger b, int shiftBits, int resultLimbs)
+    {
+        // this does an optimized Trim(a * b >> shiftBits, resultLimbs)
+        // this is NOT constant time with respect to shiftBits or resultLimbs!
+        // we also assume they are the same size
+        
+        var result = new uint[resultLimbs];
+        var shiftLimbs = shiftBits / 32;
+        var shiftRemainder = shiftBits % 32;
+        
+        for (int i = 0; i < a.Length; i++)
+        {
+            var aVal = a[i];
+            var carry = 0UL;
+        
+            for (int j = 0; j < b.Length; j++)
+            {
+                var productLimbIndex = i + j;
+            
+                if (productLimbIndex < shiftLimbs) continue;
+                if (productLimbIndex >= shiftLimbs + resultLimbs) break;
+
+                var bVal = b[j];
+                var product = (ulong)aVal * bVal + result[productLimbIndex - shiftLimbs] + carry;
+                result[productLimbIndex - shiftLimbs] = (uint)product;
+                carry = product >> 32;
+            }
+        
+            var carryIndex = i + b.Length;
+            if (carryIndex >= shiftLimbs && carryIndex < shiftLimbs + resultLimbs) 
+                result[carryIndex - shiftLimbs] = (uint)carry;
+        }
+
+        if (shiftRemainder == 0) return new(result);
+        
+        var leftShift = 32 - shiftRemainder;
+        for (int i = 0; i < resultLimbs - 1; i++) 
+            result[i] = result[i] >> shiftRemainder | result[i + 1] << leftShift;
+        result[resultLimbs - 1] >>= shiftRemainder;
+
+        return new(result);
+    }
 }
