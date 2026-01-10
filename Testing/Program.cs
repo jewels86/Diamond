@@ -22,9 +22,10 @@ class Program
         //BigIntTests.TestBarrett();  // working!
         //BigIntTests.TestMonty();    // working!
         //BigIntTests.TestStupids();  // working!
+        BigIntTests.TestRQR();
         
-        ConstantTime.Analytics.TestMontgomeryModPow();    // constant time checked
-        ConstantTime.Analytics.TestGCD();
-        ConstantTime.Analytics.TestGCDEvenVsOdd();
+        //ConstantTime.Analytics.TestMontgomeryModPow();    // constant time checked
+        //ConstantTime.Analytics.TestGCD();
+        //ConstantTime.Analytics.TestGCDEvenVsOdd();
     }
 }

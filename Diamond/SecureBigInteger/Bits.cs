@@ -28,6 +28,13 @@ public partial class SecureBigInteger
         return limb >> bitPosition & 1u;
     }
 
+    public void ClearBit(int i)
+    {
+        var limbIndex = i / 32;
+        var bitPosition = i % 32;
+        _value[limbIndex] &= ~(1u << bitPosition);
+    }
+
     public int LogicalBitLength()
     {
         var bitLength = 0;

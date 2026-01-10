@@ -99,6 +99,8 @@ public static class CryptographicOperations
         public static uint IsNonZero(uint value) => (uint)((value | -value) >> 31 & 1);
         public static uint IsZero(uint value) => 1 - IsNonZero(value);
         public static uint Not(uint value) => 1 - value;
+        public static uint IsOdd(uint value) => value & 1;
+        public static uint IsEven(uint value) => 1 - IsOdd(value);
 
         public static uint Select(uint condition, uint a, uint b)
         {

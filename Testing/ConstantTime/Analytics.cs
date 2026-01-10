@@ -7,7 +7,7 @@ namespace Testing.ConstantTime;
 public static partial class Analytics
 {
     public static RandomNumberGenerator RNG = RandomNumberGenerator.Create();
-    public static Random Random = new(42);
+    public readonly static Random Random = new(42);
     
     public static long TimeOperation(Action operation)
     {

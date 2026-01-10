@@ -62,6 +62,7 @@ public partial class SecureBigInteger
     public override int GetHashCode() => _value.GetHashCode();
 
     private uint TryGetLimb(int i, uint elseValue) => CryptographicOperations.ConstantTime.TryGetLimb(_value, i, elseValue);
+    private void TrySetLimb(int i, uint value) => CryptographicOperations.ConstantTime.TrySetLimb(_value, i, value);
     private uint this[int index]
     {
         get => _value[index];

@@ -81,6 +81,14 @@ public static class BigIntTests
         result = a * b;
         sw.Stop();
         Console.WriteLine($"larger multiplication: {a} * {b} = {result}, took {sw.ElapsedMilliseconds}ms");
+
+        a = GenerateRandomBigInt(128);
+        b = GenerateRandomBigInt(128);
+        
+        sw = Stopwatch.StartNew();
+        result = a * b;
+        sw.Stop();
+        Console.WriteLine($"big multiplication with size {a.Length} * size {b.Length} took {sw.ElapsedMilliseconds}ms");
         
         a = GenerateRandomBigInt(1000);
         b = GenerateRandomBigInt(1000);
@@ -257,6 +265,30 @@ public static class BigIntTests
         Console.WriteLine($"Expected (decimal):   {expected}");
     }
     #endregion
+
+    public static void TestRQR()
+    {
+        var sw = Stopwatch.StartNew();
+        var inverse27 = SecureBigInteger.RQR(27);
+        sw.Stop();
+        Console.WriteLine($"RQR(27) = {inverse27} ({sw.ElapsedMilliseconds}ms)");
+
+        sw = Stopwatch.StartNew();
+        var largeDivision = SecureBigInteger.RQR(new SecureBigInteger(2311567), new SecureBigInteger(14000));
+        sw.Stop();
+        Console.WriteLine($"RQR(2311567, 14000) = {largeDivision} ({sw.ElapsedMilliseconds}ms)");
+        
+        var random1 = GenerateRandomBigInt(128);
+        var random2 = GenerateRandomBigInt(64);
+        var expected = new BigInteger(random1.ToBytes()) / new BigInteger(random2.ToBytes());
+        sw = Stopwatch.StartNew();
+        var result = SecureBigInteger.RQR(random1, random2);
+        sw.Stop();
+        
+        Console.WriteLine($"Our result:\t {new BigInteger(result.ToBytes())}");
+        Console.WriteLine($"Expected:\t {expected}");
+        Console.WriteLine($"RQR([128 size], [128 size]) = {sw.ElapsedMilliseconds}ms");
+    }
     
     public static SecureBigInteger GenerateRandomBigInt(int wordCount)
     {
