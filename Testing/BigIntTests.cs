@@ -269,9 +269,9 @@ public static class BigIntTests
     public static void TestRQR()
     {
         var sw = Stopwatch.StartNew();
-        var inverse27 = SecureBigInteger.RQR(27);
+        var inverse27 = SecureBigInteger.RQR(531, 27);
         sw.Stop();
-        Console.WriteLine($"RQR(27) = {inverse27} ({sw.ElapsedMilliseconds}ms)");
+        Console.WriteLine($"RQR(531, 27) = {inverse27} ({sw.ElapsedMilliseconds}ms)");
 
         sw = Stopwatch.StartNew();
         var largeDivision = SecureBigInteger.RQR(new SecureBigInteger(2311567), new SecureBigInteger(14000));

@@ -11,20 +11,20 @@ public partial class SecureBigInteger
     public static SecureBigInteger operator ^(SecureBigInteger a, SecureBigInteger b) => BitwiseXor(a, b);
     public static SecureBigInteger operator ~(SecureBigInteger a) => BitwiseNot(a);
     
-    public static uint[] GetBits(SecureBigInteger big)
+    public uint[] GetBits()
     {
-        var result = new uint[big.BitLength];
-        for (int i = 0; i < big.BitLength; i++) 
-            result[i] = GetBit(big, i);
+        var result = new uint[BitLength];
+        for (int i = 0; i < BitLength; i++) 
+            result[i] = GetBit(i);
         
         return result;
     }
 
-    public static uint GetBit(SecureBigInteger big, int i)
+    public uint GetBit(int i)
     {
         var limbIndex = i / 32;
         var bitPosition = i % 32;
-        var limb = big[limbIndex];
+        var limb = _value[limbIndex];
         return limb >> bitPosition & 1u;
     }
 

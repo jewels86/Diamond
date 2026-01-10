@@ -28,7 +28,7 @@ public partial class SecureBigInteger
         var result = Copy(One);
         var baseBig = BarrettReduce(baseValue, modulus, mu);
 
-        var expBits = GetBits(exponent);
+        var expBits = exponent.GetBits();
     
         for (int i = 0; i < exponent.BitLength; i++)
         {

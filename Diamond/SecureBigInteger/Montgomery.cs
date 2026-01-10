@@ -52,7 +52,7 @@ public partial class SecureBigInteger
         var baseMont = ctx.ToMontgomery(baseValue);
         var resultMont = ctx.ToMontgomery(One);
     
-        var expBits = GetBits(exponent);
+        var expBits = exponent.GetBits();
     
         for (int i = 0; i < exponent.LogicalBitLength(); i++)
         {

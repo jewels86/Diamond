@@ -18,7 +18,7 @@ public partial class SecureBigInteger
         {
             remainder <<= 1;
 
-            var dividendBit = GetBit(a, bitPos);
+            var dividendBit = a.GetBit(bitPos);
             remainder[0] |= dividendBit;
 
             var canSubtract = remainder >= b;
@@ -32,19 +32,13 @@ public partial class SecureBigInteger
         return (quotient, remainder);
     }
 
-    public static (SecureBigInteger inverseB, int k) RQR(SecureBigInteger b, int aBitLength = 0)
+    public static (SecureBigInteger inverseB, int k) ComputeInverseB(SecureBigInteger b, int N = 30)
     {
-        const int C = 16;
-        const int B = 30;
-        const int A = 4;
-        
-        var k = b.LogicalBitLength() - 1;
+        var k = b.LogicalBitLength();
         var n = Copy(b);
         n.ClearBit(k);
-        
-        var N = (b.BitLength / C) + B;
-        var s = b.BitLength + A * N;
-        
+
+        var s = N * k;
         var h = n << s - k;
 
         var inverseBScaled = One << s;
@@ -61,12 +55,4 @@ public partial class SecureBigInteger
         var totalScale = s + k;
         return (inverseBScaled, totalScale);
     }
-
-    public static SecureBigInteger RQR(SecureBigInteger a, SecureBigInteger b)
-    {
-        var (inverseB, k) = RQR(b, a.BitLength);
-        return RQR(a, inverseB, k);
-    }
-    
-    public static SecureBigInteger RQR(SecureBigInteger a, SecureBigInteger inverseB, int k) => a * inverseB >> k;
 }
