@@ -31,9 +31,9 @@ public partial class SecureBigInteger
         return result;
     }
 
-    public static SecureBigInteger OpTMS(SecureBigInteger a, SecureBigInteger b, int shiftBits, int resultLimbs)
+    public static SecureBigInteger OpMSrT(SecureBigInteger a, SecureBigInteger b, int shiftBits, int resultLimbs)
     {
-        // this does an optimized Trim(a * b >> shiftBits, resultLimbs)
+        // this does an optimized Trim(a * b >> shiftBits, resultLimbs) (multiply, shift right, and trim)
         // this is NOT constant time with respect to shiftBits or resultLimbs!
         // we also assume they are the same size
         

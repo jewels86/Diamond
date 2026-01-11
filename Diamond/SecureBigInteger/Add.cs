@@ -66,7 +66,8 @@ public partial class SecureBigInteger
             carry = CryptographicOperations.ConstantTime.ExtractUpperBits(sum);
         }
         
-        result[maxLen] = (uint)carry;
+        var finalCarry = CryptographicOperations.ConstantTime.Select(shouldSubtract, 0UL, carry);
+        result[maxLen] = (uint)finalCarry;
         return new(result);
     }
 }
