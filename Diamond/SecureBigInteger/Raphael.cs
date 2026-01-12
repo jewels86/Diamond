@@ -13,7 +13,7 @@ public partial class SecureBigInteger
         k = (int)CryptographicOperations.ConstantTime.Select(usingHigher, (uint)k + 1, (uint)k);
         var n = Select(usingHigher, m - b, b - m);
 
-        var N = Math.Max(aBitLength - b.BitLength, 32);
+        var N = Math.Max(2 + aBitLength - b.BitLength, 32);
         var s = Math.Max(aBitLength, 64);
         
         var h = n << s - k;
@@ -38,20 +38,13 @@ public partial class SecureBigInteger
     public static SecureBigInteger RaphaelReduce(SecureBigInteger a, SecureBigInteger n, (SecureBigInteger invB, int scale)? beta = null)
     {
         beta ??= ComputeRaphaelBeta(n, Math.Max(a.BitLength, 2 * n.BitLength));
-    
-        var quotient = (a * beta.Value.invB) >> beta.Value.scale;
-        var remainder = a - quotient * n;
-
-        return Trim(remainder, n.Length);
+        return Trim(RaphaelDivide(a, n, beta.Value).remainder, n.Length);
     }
 
     public static (SecureBigInteger quotient, SecureBigInteger remainder) RaphaelDivide(SecureBigInteger a, SecureBigInteger b, (SecureBigInteger invB, int scale) beta)
     {
-        var product = a * beta.invB;
-
-        var quotient = product >> beta.scale;
-        var fractional = product & (One << beta.scale) - 1;
-        var remainder = fractional * b >> beta.scale;
+        var quotient = (a * beta.invB) >> beta.scale;
+        var remainder = a - quotient * b;
 
         return (quotient, remainder);
     }
