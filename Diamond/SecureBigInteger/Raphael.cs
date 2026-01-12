@@ -15,11 +15,12 @@ public partial class SecureBigInteger
 
         var N = Math.Max(aBitLength - b.BitLength, 32);
         var s = Math.Max(aBitLength, 64);
+        
         var h = n << s - k;
 
         var invB = One << s;
         invB = OpAOS(invB, h, 1u ^ usingHigher);
-
+        
         var sLimbs = (s + 31) / 32;
         var hPow = h;
         for (int i = 2; i < N; i++)

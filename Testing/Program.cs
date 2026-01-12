@@ -21,7 +21,8 @@ class Program
         //BigIntTests.TestGCD();      // working!
         //BigIntTests.TestBarrett();  // working!
         //BigIntTests.TestMonty();    // working!
-        BigIntTests.TestStupids();  // working!
+        //BigIntTests.TestStupids();  // working!
+        //BigIntTests.TestStupids2();
         BigIntTests.TestRaphael();
         
         //ConstantTime.Analytics.TestMontgomeryModPow();    // constant time checked

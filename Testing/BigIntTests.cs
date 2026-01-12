@@ -244,43 +244,7 @@ public static class BigIntTests
         Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected {BigInteger.ModPow(5, 10, 221)} ({sw.ElapsedMilliseconds}ms)");
     }
     #endregion
-
-    #region Stupid
-    public static void TestStupids()
-    {
-        var base1 = new SecureBigInteger(BigInteger.Parse("123456789012345678901234567890123456789012345678901234567890"));
-        var exp1 = new SecureBigInteger(65537);
-        var mod1 = new SecureBigInteger(BigInteger.Parse("987654321098765432109876543210987654321098765432109876543211"));
-
-        var sw = Stopwatch.StartNew();
-        var resultBarrett = SecureBigInteger.ModPowWithBarrett(base1, exp1, mod1);
-        sw.Stop();
-        var barrettTime = sw.ElapsedMilliseconds;
-        
-        sw = Stopwatch.StartNew();
-        var resultMontgomery = SecureBigInteger.ModPowWithMontgomery(base1, exp1, mod1);
-        sw.Stop();
-        var montgomeryTime = sw.ElapsedMilliseconds;
-        
-        sw = Stopwatch.StartNew();
-        var resultRaphael = SecureBigInteger.ModPowWithRaphael(base1, exp1, mod1);
-        sw.Stop();
-        var raphaelTime = sw.ElapsedMilliseconds;
-        
-        
-        var expected = BigInteger.ModPow(
-            BigInteger.Parse("123456789012345678901234567890123456789012345678901234567890"),
-            65537,
-            BigInteger.Parse("987654321098765432109876543210987654321098765432109876543211")
-        );
-
-        Console.WriteLine($"Barrett (decimal):    {new BigInteger(resultBarrett.ToBytes())} ({barrettTime}ms)");
-        Console.WriteLine($"Montgomery (decimal): {new BigInteger(resultMontgomery.ToBytes())} ({montgomeryTime}ms)");
-        Console.WriteLine($"Raphael (decimal):    {new BigInteger(resultRaphael.ToBytes())} ({raphaelTime}ms)");
-        Console.WriteLine($"Expected (decimal):   {expected}");
-    }
-    #endregion
-
+    #region Raphael
     public static void TestRaphael()
     {
         var sw = Stopwatch.StartNew();
@@ -299,10 +263,14 @@ public static class BigIntTests
         sw = Stopwatch.StartNew();
         var result = SecureBigInteger.RaphaelDivide(random1, random2);
         sw.Stop();
+        var raphaelTime = sw.ElapsedMilliseconds;
+        sw = Stopwatch.StartNew();
+        SecureBigInteger.Divide(random1, random2);
+        sw.Stop();
         
         Console.WriteLine($"Our result:\t {ToPositiveBigInteger(result)}");
         Console.WriteLine($"Expected:\t {expected}");
-        Console.WriteLine($"RM([128 size], [64 size]) = {sw.ElapsedMilliseconds}ms");
+        Console.WriteLine($"RM([128 size], [64 size]) took {raphaelTime}ms vs long divide's {sw.ElapsedMilliseconds}");
         
         var baseBig = new SecureBigInteger(7);
         var exponent = new SecureBigInteger(3);
@@ -321,25 +289,80 @@ public static class BigIntTests
         result = SecureBigInteger.ModPowWithRaphael(baseBig, exponent, modulus);
         sw.Stop();
         Console.WriteLine($"ModPow({baseBig}, {exponent}, {modulus}) = {result}, expected {BigInteger.ModPow(5, 10, 221)} ({sw.ElapsedMilliseconds}ms)");
-        
-        var test1 = SecureBigInteger.RaphaelReduce(new SecureBigInteger(25), new SecureBigInteger(221), null);
-        Console.WriteLine($"25 mod 221 = {test1}, expected 25");
-
-        var test2 = SecureBigInteger.RaphaelReduce(new SecureBigInteger(625), new SecureBigInteger(221), null);
-        Console.WriteLine($"625 mod 221 = {test2}, expected 183");
-        
-        var a = new SecureBigInteger(25);
-        var b = new SecureBigInteger(221);
-        var beta = SecureBigInteger.ComputeRaphaelBeta(b, a.BitLength);
-
-        Console.WriteLine($"a.BitLength = {a.BitLength}");
-        Console.WriteLine($"scale = {beta.scale}");
-
-        var product = a * beta.invB;
-        var quotient = product >> beta.scale;
-
-        Console.WriteLine($"quotient = {quotient}, expected 0");
     }
+    #endregion
+
+    #region Stupid
+    public static void TestStupids()
+    {
+        var b = new SecureBigInteger(BigInteger.Parse("123456789012345678901234567890123456789012345678901234567890"));
+        var e = new SecureBigInteger(65537);
+        var n = new SecureBigInteger(BigInteger.Parse("987654321098765432109876543210987654321098765432109876543211"));
+
+        var sw = Stopwatch.StartNew();
+        var resultBarrett = SecureBigInteger.ModPowWithBarrett(b, e, n);
+        sw.Stop();
+        var barrettTime = sw.ElapsedMilliseconds;
+        
+        sw = Stopwatch.StartNew();
+        var resultMontgomery = SecureBigInteger.ModPowWithMontgomery(b, e, n);
+        sw.Stop();
+        var montgomeryTime = sw.ElapsedMilliseconds;
+        
+        sw = Stopwatch.StartNew();
+        var resultRaphael = SecureBigInteger.ModPowWithRaphael(b, e, n);
+        sw.Stop();
+        var raphaelTime = sw.ElapsedMilliseconds;
+        
+        
+        var expected = BigInteger.ModPow(
+            BigInteger.Parse("123456789012345678901234567890123456789012345678901234567890"),
+            65537,
+            BigInteger.Parse("987654321098765432109876543210987654321098765432109876543211")
+        );
+
+        Console.WriteLine($"Barrett (decimal):    {new BigInteger(resultBarrett.ToBytes())} ({barrettTime}ms)");
+        Console.WriteLine($"Montgomery (decimal): {new BigInteger(resultMontgomery.ToBytes())} ({montgomeryTime}ms)");
+        Console.WriteLine($"Raphael (decimal):    {new BigInteger(resultRaphael.ToBytes())} ({raphaelTime}ms)");
+        Console.WriteLine($"Expected (decimal):   {expected}");
+    }
+    public static void TestStupids2()
+    {
+        var b = new SecureBigInteger(BigInteger.Parse("123456789012345678901234567890123456789012345678901234567890"));
+        var e = new SecureBigInteger(65537);
+        var n = new SecureBigInteger(BigInteger.Parse("987654321098765432109876543210987654321098765432109876543211"));
+
+        var mu = SecureBigInteger.ComputeBarrettMu(n);
+        var sw = Stopwatch.StartNew();
+        var resultBarrett = SecureBigInteger.ModPowWithBarrett(b, e, n, mu);
+        sw.Stop();
+        var barrettTime = sw.ElapsedMilliseconds;
+        
+        var ctx = new MontgomeryContext(n);
+        sw = Stopwatch.StartNew();
+        var resultMontgomery = SecureBigInteger.ModPowWithMontgomery(b, e, n, ctx);
+        sw.Stop();
+        var montgomeryTime = sw.ElapsedMilliseconds;
+        
+        var beta = SecureBigInteger.ComputeRaphaelBeta(n, n.BitLength * 2);
+        sw = Stopwatch.StartNew();
+        var resultRaphael = SecureBigInteger.ModPowWithRaphael(b, e, n, beta);
+        sw.Stop();
+        var raphaelTime = sw.ElapsedMilliseconds;
+        
+        var expected = BigInteger.ModPow(
+            BigInteger.Parse("123456789012345678901234567890123456789012345678901234567890"),
+            65537,
+            BigInteger.Parse("987654321098765432109876543210987654321098765432109876543211")
+        );
+
+        Console.WriteLine($"Barrett (decimal):    {new BigInteger(resultBarrett.ToBytes())} ({barrettTime}ms)");
+        Console.WriteLine($"Montgomery (decimal): {new BigInteger(resultMontgomery.ToBytes())} ({montgomeryTime}ms)");
+        Console.WriteLine($"Raphael (decimal):    {new BigInteger(resultRaphael.ToBytes())} ({raphaelTime}ms)");
+        Console.WriteLine($"Expected (decimal):   {expected}");
+    }
+    #endregion
+
     
     public static SecureBigInteger GenerateRandomBigInt(int wordCount)
     {
