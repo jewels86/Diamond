@@ -15,18 +15,20 @@ class Program
         
         //BigIntTests.TestAdd();      // working!
         //BigIntTests.TestSubtract(); // working!
-        //BigIntTests.TestMultiply(); // working!
-        //BigIntTests.TestDivide();   // working!
-        //BigIntTests.TestMod();      // working!
+        BigIntTests.TestMultiply(); // working!
+        BigIntTests.TestDivide();   // working!
+        BigIntTests.TestMod();      // working!
         //BigIntTests.TestGCD();      // working!
-        //BigIntTests.TestBarrett();  // working!
-        //BigIntTests.TestMonty();    // working!
+        BigIntTests.TestBarrett();  // working!
+        BigIntTests.TestMonty();    // working!
         BigIntTests.TestStupids();  // working!
-        BigIntTests.TestStupids2();
-        BigIntTests.TestRaphael();
+        BigIntTests.TestStupids2(); // working!
+        BigIntTests.TestRaphael();  // working!
         
         //ConstantTime.Analytics.TestMontgomeryModPow();    // constant time checked
+        //ConstantTime.Analytics.TestRaphaelModPow();       // constant time checked
         //ConstantTime.Analytics.TestGCD();
         //ConstantTime.Analytics.TestGCDEvenVsOdd();
+        //ConstantTime.Analytics.TestRaphaelDivide();
     }
 }

@@ -265,7 +265,7 @@ public static class BigIntTests
         sw.Stop();
         var raphaelTime = sw.ElapsedMilliseconds;
         sw = Stopwatch.StartNew();
-        SecureBigInteger.LongDivide(random1, random2);
+        SecureBigInteger.LongDivide(random1, random2);                     
         sw.Stop();
         
         Console.WriteLine($"Our result:\t {ToPositiveBigInteger(result)}");
@@ -344,9 +344,9 @@ public static class BigIntTests
         sw.Stop();
         var montgomeryTime = sw.ElapsedMilliseconds;
         
-        var beta = SecureBigInteger.ComputeRaphaelBeta(n, n.BitLength * 2);
+        var (beta, scale) = SecureBigInteger.ComputeRaphaelBeta(n, n.BitLength * 2);
         sw = Stopwatch.StartNew();
-        var resultRaphael = SecureBigInteger.ModPowWithRaphael(b, e, n, beta);
+        var resultRaphael = SecureBigInteger.ModPowWithRaphael(b, e, n, beta, scale);
         sw.Stop();
         var raphaelTime = sw.ElapsedMilliseconds;
         

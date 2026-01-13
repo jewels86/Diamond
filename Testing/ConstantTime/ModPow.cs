@@ -4,9 +4,48 @@ namespace Testing.ConstantTime;
 
 public static partial class Analytics
 {
+    public static void TestRaphaelModPow()
+    {
+        Console.WriteLine("Testing ModPow with Raphael...");
+        var random = new Random();
+        const int wordCount = 4;
+        const int warmup = 100;
+        const int iterationsMultiplier = 1;
+
+        Console.WriteLine($"Generating {warmup} random exponents...");
+        var modulus = GenerateRandomBigInt(wordCount, random);
+        var baseValue = GenerateRandomBigInt(wordCount, random);
+        var (beta, scale) = SecureBigInteger.ComputeRaphaelBeta(modulus, 2 * modulus.Length);
+
+        var sparseExponents = GenerateRandomSetWithHammingWeight(warmup, wordCount, 0.9f);
+        var denseExponents = GenerateRandomSetWithHammingWeight(warmup, wordCount, 0.1f);
+
+        Console.WriteLine("Warming up...");
+        for (int i = 0; i < warmup; i++)
+        {
+            SecureBigInteger.ModPowWithRaphael(baseValue, sparseExponents[i], modulus, beta, scale);
+            SecureBigInteger.ModPowWithRaphael(baseValue, denseExponents[i], modulus, beta, scale);
+        }
+
+        List<long> sparseTimes = [];
+        List<long> denseTimes = [];
+
+        var samples = iterationsMultiplier * warmup;
+        Console.WriteLine($"Running {samples} samples...");
+        
+        for (int i = 0; i < samples; i++)
+        {
+            var sample = i % warmup;
+            sparseTimes.Add(TimeOperation(() => SecureBigInteger.ModPowWithRaphael(baseValue, sparseExponents[sample], modulus, beta, scale)));
+            denseTimes.Add(TimeOperation(() => SecureBigInteger.ModPowWithRaphael(baseValue, denseExponents[sample], modulus, beta, scale)));
+        }
+        
+        AnalyzeResults("ModPow with Raphael Sparse v. Dense Results", sparseTimes, denseTimes);
+    }
+    
     public static void TestMontgomeryModPow()
     {
-        Console.WriteLine("Testing ModPow with Montgomery Exponents...");
+        Console.WriteLine("Testing ModPow with Montgomery...");
         var random = new Random();
         const int wordCount = 4;
         const int warmup = 100;
