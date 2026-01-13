@@ -15,7 +15,7 @@ class Program
         
         //BigIntTests.TestAdd();      // working!
         //BigIntTests.TestSubtract(); // working!
-        //BigIntTests.TestMultiply(); // working!
+        BigIntTests.TestMultiply(); // working!
         //BigIntTests.TestDivide();   // working!
         //BigIntTests.TestMod();      // working!
         //BigIntTests.TestGCD();      // working!

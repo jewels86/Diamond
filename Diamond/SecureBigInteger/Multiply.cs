@@ -7,9 +7,10 @@ namespace Diamond;
 
 public partial class SecureBigInteger
 {
-    public static SecureBigInteger operator *(SecureBigInteger a, SecureBigInteger b) => Multiply(a, b);
+    public static SecureBigInteger operator *(SecureBigInteger a, SecureBigInteger b) => KaratsubaMultiply(a, b);
     
-    public static SecureBigInteger Multiply(SecureBigInteger a, SecureBigInteger b)
+    #region Schoolbook
+    public static SecureBigInteger StandardMultiply(SecureBigInteger a, SecureBigInteger b)
     {
         var resultSize = a.Length + b.Length;
         var result = new uint[resultSize];
@@ -73,4 +74,37 @@ public partial class SecureBigInteger
 
         return new(result);
     }
+    #endregion
+    #region Karatsuba
+    private static SecureBigInteger CombineKaratsuba(SecureBigInteger z2, SecureBigInteger z1, SecureBigInteger z0, int halfSize, uint z1Negative)
+    {
+        var resultSize = 2 * halfSize + z2.Length + 1;
+        var result = new uint[resultSize];
+        
+        AddInto(result, 0, z0);
+        AddOrSubtractInto(result, halfSize, z1, z1Negative);
+        AddInto(result, 2 * halfSize, z2);
+
+        return new(result);
+    }
+
+    public static SecureBigInteger KaratsubaMultiply(SecureBigInteger a, SecureBigInteger b)
+    {
+        if (a.Length < 16 || b.Length < 16) return StandardMultiply(a, b);
+        
+        var halfSize = Math.Max(a.Length, b.Length) / 2;
+        
+        var a0 = GetLow(a, halfSize);
+        var a1 = GetHigh(a, halfSize);
+        var b0 = GetLow(b, halfSize);
+        var b1 = GetHigh(b, halfSize);
+        
+        var z0 = KaratsubaMultiply(a0, b0);
+        var z2 = KaratsubaMultiply(a1, b1);
+        var z1 = KaratsubaMultiply(a0 + a1, b0 + b1);
+        z1 = Subtract(z1 - z0, z2, out var borrow);
+        
+        return CombineKaratsuba(z2, z1, z0, halfSize, borrow);
+    }
+    #endregion
 }

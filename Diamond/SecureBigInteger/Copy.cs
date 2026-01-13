@@ -16,16 +16,19 @@ public partial class SecureBigInteger
     public static SecureBigInteger Pad(SecureBigInteger source, int length)
     {
         var result = new uint[length];
-        for (int i = 0; i < source.Length; i++) result[i] = source[i];
+        for (int i = 0; i < length && i < source.Length; i++) result[i] = source[i];
         return new(result);
     }
     
     public static SecureBigInteger Trim(SecureBigInteger source, int length) => Copy(source, 0, 0, length);
     public static SecureBigInteger Copy(SecureBigInteger source) => Copy(source, 0, 0, source.Length);
 
-    public static SecureBigInteger OpTrim(SecureBigInteger source, int length)
+    private static SecureBigInteger GetLow(SecureBigInteger x, int halfSize) => Pad(x, halfSize);
+    private static SecureBigInteger GetHigh(SecureBigInteger x, int halfSize)
     {
-        var result = source._value.Take(length).ToArray();
-        return new(result);
+        if (x.Length <= halfSize) return Zero;
+        var result = new uint[x.Length - halfSize];
+        CryptographicOperations.ConstantTime.Copy(x._value, halfSize, result, 0, result.Length);
+        return new SecureBigInteger(result);
     }
 }

@@ -38,13 +38,17 @@ public partial class SecureBigInteger
     public static SecureBigInteger RaphaelReduce(SecureBigInteger a, SecureBigInteger n, (SecureBigInteger invB, int scale)? beta = null)
     {
         beta ??= ComputeRaphaelBeta(n, Math.Max(a.BitLength, 2 * n.BitLength));
-        return Trim(RaphaelDivide(a, n, beta.Value).remainder, n.Length);
+        
+        var quotient = (a * beta.Value.invB) >> beta.Value.scale; // OpMSr!
+        var remainder = a - quotient * n; // OpRemT!
+        
+        return Trim(remainder, n.Length);
     }
 
     public static (SecureBigInteger quotient, SecureBigInteger remainder) RaphaelDivide(SecureBigInteger a, SecureBigInteger b, (SecureBigInteger invB, int scale) beta)
     {
-        var quotient = (a * beta.invB) >> beta.scale;
-        var remainder = a - quotient * b;
+        var quotient = (a * beta.invB) >> beta.scale; // OpMSr!
+        var remainder = a - quotient * b; // OpRem!
 
         return (quotient, remainder);
     }
@@ -60,7 +64,7 @@ public partial class SecureBigInteger
     
         for (int i = 0; i < exponent.BitLength; i++)
         {
-            result = Select(expBits[i], RaphaelReduce(result * baseBig, modulus, beta), result);
+            result = Select(expBits[i], RaphaelReduce(result * baseBig, modulus, beta), result); // karatsuba!
             baseBig = RaphaelReduce(baseBig * baseBig, modulus, beta);
         }
     
