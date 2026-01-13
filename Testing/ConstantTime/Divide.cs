@@ -7,11 +7,10 @@ public partial class Analytics
     public static void TestRaphaelDivide()
     {
         Console.WriteLine("Testing Raphael's Method...");
-        var random = new Random();
         const int wordCountSmall = 64;
         const int wordCountLarge = 128;
         const int warmup = 100;
-        const int iterationsMultiplier = 1;
+        const int iterationsMultiplier = 3;
 
         Console.WriteLine($"Generating {warmup} random divisors...");
         List<SecureBigInteger> smallDivisors = [];

@@ -344,9 +344,9 @@ public static class BigIntTests
         sw.Stop();
         var montgomeryTime = sw.ElapsedMilliseconds;
         
-        var (beta, scale) = SecureBigInteger.ComputeRaphaelBeta(n, n.BitLength * 2);
+        var raphaelCTX = SecureBigInteger.ComputeRaphaelBeta(n, n.BitLength * 2);
         sw = Stopwatch.StartNew();
-        var resultRaphael = SecureBigInteger.ModPowWithRaphael(b, e, n, beta, scale);
+        var resultRaphael = SecureBigInteger.ModPowWithRaphael(b, e, n, raphaelCTX);
         sw.Stop();
         var raphaelTime = sw.ElapsedMilliseconds;
         

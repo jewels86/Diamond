@@ -6,8 +6,8 @@ namespace Diamond;
 
 public partial class SecureBigInteger
 {
-    public static SecureBigInteger operator /(SecureBigInteger a, SecureBigInteger b) => RaphaelDivide(a, b);
-    public static SecureBigInteger operator %(SecureBigInteger a, SecureBigInteger n) => OpRemT(a, RaphaelDivide(a, n), n, n.Length);
+    public static SecureBigInteger operator /(SecureBigInteger a, SecureBigInteger b) => RaphaelContext.RaphaelDivide(a, b);
+    public static SecureBigInteger operator %(SecureBigInteger a, SecureBigInteger n) => OpRemT(a, RaphaelContext.RaphaelDivide(a, n), n, n.Length);
 
     public static (SecureBigInteger quotient, SecureBigInteger remainder) LongDivide(SecureBigInteger a, SecureBigInteger b)
     {

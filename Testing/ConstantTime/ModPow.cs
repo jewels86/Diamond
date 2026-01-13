@@ -15,7 +15,7 @@ public static partial class Analytics
         Console.WriteLine($"Generating {warmup} random exponents...");
         var modulus = GenerateRandomBigInt(wordCount, random);
         var baseValue = GenerateRandomBigInt(wordCount, random);
-        var (beta, scale) = SecureBigInteger.ComputeRaphaelBeta(modulus, 2 * modulus.Length);
+        var ctx = SecureBigInteger.ComputeRaphaelBeta(modulus, 2 * modulus.Length);
 
         var sparseExponents = GenerateRandomSetWithHammingWeight(warmup, wordCount, 0.9f);
         var denseExponents = GenerateRandomSetWithHammingWeight(warmup, wordCount, 0.1f);
@@ -23,8 +23,8 @@ public static partial class Analytics
         Console.WriteLine("Warming up...");
         for (int i = 0; i < warmup; i++)
         {
-            SecureBigInteger.ModPowWithRaphael(baseValue, sparseExponents[i], modulus, beta, scale);
-            SecureBigInteger.ModPowWithRaphael(baseValue, denseExponents[i], modulus, beta, scale);
+            SecureBigInteger.ModPowWithRaphael(baseValue, sparseExponents[i], modulus, ctx);
+            SecureBigInteger.ModPowWithRaphael(baseValue, denseExponents[i], modulus, ctx);
         }
 
         List<long> sparseTimes = [];
@@ -36,8 +36,8 @@ public static partial class Analytics
         for (int i = 0; i < samples; i++)
         {
             var sample = i % warmup;
-            sparseTimes.Add(TimeOperation(() => SecureBigInteger.ModPowWithRaphael(baseValue, sparseExponents[sample], modulus, beta, scale)));
-            denseTimes.Add(TimeOperation(() => SecureBigInteger.ModPowWithRaphael(baseValue, denseExponents[sample], modulus, beta, scale)));
+            sparseTimes.Add(TimeOperation(() => SecureBigInteger.ModPowWithRaphael(baseValue, sparseExponents[sample], modulus, ctx)));
+            denseTimes.Add(TimeOperation(() => SecureBigInteger.ModPowWithRaphael(baseValue, denseExponents[sample], modulus, ctx)));
         }
         
         AnalyzeResults("ModPow with Raphael Sparse v. Dense Results", sparseTimes, denseTimes);

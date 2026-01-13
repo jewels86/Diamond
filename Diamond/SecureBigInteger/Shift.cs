@@ -63,6 +63,7 @@ public partial class SecureBigInteger
         return new(result);
     }
     
+    #region Paranoid
     public static SecureBigInteger ParanoidLeftShift(SecureBigInteger big, int totalShift, int fixedIterations)
     {
         var limbShift = totalShift / 32;
@@ -114,6 +115,57 @@ public partial class SecureBigInteger
 
         return result;
     }
+    #endregion
+    #region Safe
+    public static SecureBigInteger SafeLeftShift(SecureBigInteger value, int shiftBits, int maxShiftBits)
+    {
+        if (shiftBits < 0) return SafeRightShift(value, -shiftBits);
+        
+        var maxShiftLimbs = maxShiftBits / 32;
+        var resultSize = value.Length + maxShiftLimbs + 1;
+        var result = new uint[resultSize];
+    
+        var shiftLimbs = shiftBits / 32;
+        var shiftRemainder = shiftBits % 32;
+        var leftShift = 32 - shiftRemainder;
+    
+        var carry = 0U;
+        for (int i = 0; i < value.Length; i++)
+        {
+            var val = value[i];
+            var shifted = (val << shiftRemainder) | carry;
+            carry = CryptographicOperations.ConstantTime.Select(CryptographicOperations.ConstantTime.IsNonZero((uint)shiftRemainder), val >> leftShift, 0U);
+            result[i + shiftLimbs] = shifted;
+        }
+        result[value.Length + shiftLimbs] = carry;
+    
+        return new(result);
+    }
+    
+    public static SecureBigInteger SafeRightShift(SecureBigInteger value, int shiftBits)
+    {
+        var shiftLimbs = shiftBits / 32;
+        var shiftRemainder = shiftBits % 32;
+    
+        if (shiftLimbs >= value.Length) return Zero;
+    
+        var resultSize = value.Length - shiftLimbs;
+        var result = new uint[resultSize];
+    
+        var leftShift = 32 - shiftRemainder;
+    
+        for (int i = 0; i < resultSize; i++)
+        {
+            var low = value.OpTryGetLimb(shiftLimbs + i, 0);
+            var high = value.OpTryGetLimb(shiftLimbs + i + 1, 0);
+        
+            var shifted = low >> shiftRemainder | high << leftShift;
+            result[i] = shifted;
+        }
+    
+        return new(result);
+    }
+    #endregion
     
     public static SecureBigInteger OpSrT(SecureBigInteger value, int shiftBits, int resultLimbs)
     {
