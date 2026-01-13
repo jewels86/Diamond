@@ -25,8 +25,8 @@ public partial class SecureBigInteger
         var borrow = 0U;
         for (int i = 0; i < a.Length; i++)
         {
-            var aVal = a.TryGetLimb(i, 0);
-            var bVal = b.TryGetLimb(i, 0);
+            var aVal = a.OpTryGetLimb(i, 0);
+            var bVal = b.OpTryGetLimb(i, 0);
             var diff = (ulong)aVal - bVal - borrow;
             borrow = CryptographicOperations.ConstantTime.ExtractOverflowBit(diff);
         }
@@ -38,8 +38,8 @@ public partial class SecureBigInteger
         var equal = 1U;
         for (int i = 0; i < a.Length; i++)
         {
-            var aVal = a.TryGetLimb(i, 0);
-            var bVal = b.TryGetLimb(i, 0);
+            var aVal = a.OpTryGetLimb(i, 0);
+            var bVal = b.OpTryGetLimb(i, 0);
             var isNonZero = CryptographicOperations.ConstantTime.IsNonZero(aVal - bVal);
             equal = CryptographicOperations.ConstantTime.Select(isNonZero, 0U, equal);
         }
