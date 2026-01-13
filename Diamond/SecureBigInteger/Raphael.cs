@@ -62,7 +62,7 @@ public class RaphaelContext(SecureBigInteger beta, SecureBigInteger b, int s, in
     public int Scale => S + K;
     public int MaxScale => S + B.BitLength;
     
-    public SecureBigInteger Divide(SecureBigInteger a) => SecureBigInteger.RightShift(a * Beta, Scale);
+    public SecureBigInteger Divide(SecureBigInteger a) => a * Beta >> Scale;
     public SecureBigInteger Reduce(SecureBigInteger a)
     {
         var quotient = Divide(a);
