@@ -114,4 +114,28 @@ public partial class SecureBigInteger
 
         return result;
     }
+    
+    public static SecureBigInteger OpSrT(SecureBigInteger value, int shiftBits, int resultLimbs)
+    {
+        var shiftLimbs = shiftBits / 32;
+        var shiftRemainder = shiftBits % 32;
+    
+        var result = new uint[resultLimbs];
+
+        if (shiftRemainder == 0)
+            for (int i = 0; i < resultLimbs && shiftLimbs + i < value.Length; i++)
+                result[i] = value.OpTryGetLimb(shiftLimbs + i, 0);
+        else
+        {
+            var leftShift = 32 - shiftRemainder;
+            for (int i = 0; i < resultLimbs; i++)
+            {
+                var low = value.OpTryGetLimb(shiftLimbs + i, 0);
+                var high = value.OpTryGetLimb(shiftLimbs + i + 1, 0);
+                result[i] = (low >> shiftRemainder) | (high << leftShift);
+            }
+        }
+    
+        return new(result);
+    }
 }

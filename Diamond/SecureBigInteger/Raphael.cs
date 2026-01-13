@@ -25,7 +25,7 @@ public partial class SecureBigInteger
         var hPow = h;
         for (int i = 2; i < N; i++)
         {
-            hPow = OpMSrT(hPow, h, s, sLimbs); // Trim(hPow * h >> s, sLimbs)
+            hPow = OpMSrTSchoolbook(hPow, h, s, sLimbs); // Trim(hPow * h >> s, sLimbs)
             invB = OpAOS(invB, hPow, CryptographicOperations.ConstantTime.IsOdd((uint)i) & (1u ^ usingHigher)); // shouldSubtract ? Subtract(invB, hPow) : Add(invB, hPow)
         }
 
@@ -39,18 +39,10 @@ public partial class SecureBigInteger
     {
         beta ??= ComputeRaphaelBeta(n, Math.Max(a.BitLength, 2 * n.BitLength));
         
-        var quotient = (a * beta.Value.invB) >> beta.Value.scale; // OpMSr!
-        var remainder = a - quotient * n; // OpRemT!
-        
-        return Trim(remainder, n.Length);
-    }
+        var quotient = (a * beta.Value.invB) >> beta.Value.scale;
+        var remainder = OpRemT(a, quotient, n, n.Length);
 
-    public static (SecureBigInteger quotient, SecureBigInteger remainder) RaphaelDivide(SecureBigInteger a, SecureBigInteger b, (SecureBigInteger invB, int scale) beta)
-    {
-        var quotient = (a * beta.invB) >> beta.scale; // OpMSr!
-        var remainder = a - quotient * b; // OpRem!
-
-        return (quotient, remainder);
+        return remainder;
     }
 
     public static SecureBigInteger ModPowWithRaphael(SecureBigInteger baseValue, SecureBigInteger exponent, SecureBigInteger modulus, (SecureBigInteger invB, int scale)? beta = null)
@@ -64,7 +56,7 @@ public partial class SecureBigInteger
     
         for (int i = 0; i < exponent.BitLength; i++)
         {
-            result = Select(expBits[i], RaphaelReduce(result * baseBig, modulus, beta), result); // karatsuba!
+            result = Select(expBits[i], RaphaelReduce(result * baseBig, modulus, beta), result);
             baseBig = RaphaelReduce(baseBig * baseBig, modulus, beta);
         }
     

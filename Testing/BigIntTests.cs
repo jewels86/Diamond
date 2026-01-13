@@ -265,7 +265,7 @@ public static class BigIntTests
         sw.Stop();
         var raphaelTime = sw.ElapsedMilliseconds;
         sw = Stopwatch.StartNew();
-        SecureBigInteger.Divide(random1, random2);
+        SecureBigInteger.LongDivide(random1, random2);
         sw.Stop();
         
         Console.WriteLine($"Our result:\t {ToPositiveBigInteger(result)}");

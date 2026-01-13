@@ -16,7 +16,8 @@ public partial class SecureBigInteger
     public static SecureBigInteger Pad(SecureBigInteger source, int length)
     {
         var result = new uint[length];
-        for (int i = 0; i < length && i < source.Length; i++) result[i] = source[i];
+        var minLen = Math.Min(source.Length, length);
+        for (int i = 0; i < minLen; i++) result[i] = source[i];
         return new(result);
     }
     

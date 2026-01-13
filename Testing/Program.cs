@@ -15,14 +15,14 @@ class Program
         
         //BigIntTests.TestAdd();      // working!
         //BigIntTests.TestSubtract(); // working!
-        BigIntTests.TestMultiply(); // working!
+        //BigIntTests.TestMultiply(); // working!
         //BigIntTests.TestDivide();   // working!
         //BigIntTests.TestMod();      // working!
         //BigIntTests.TestGCD();      // working!
         //BigIntTests.TestBarrett();  // working!
         //BigIntTests.TestMonty();    // working!
-        //BigIntTests.TestStupids();  // working!
-        //BigIntTests.TestStupids2();
+        BigIntTests.TestStupids();  // working!
+        BigIntTests.TestStupids2();
         BigIntTests.TestRaphael();
         
         //ConstantTime.Analytics.TestMontgomeryModPow();    // constant time checked

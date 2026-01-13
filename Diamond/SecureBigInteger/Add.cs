@@ -18,8 +18,8 @@ public partial class SecureBigInteger
         var result = new uint[maxLen + 1];
         for (int i = 0; i < maxLen; i++)
         {
-            var aVal = a.TryGetLimb(i, 0);
-            var bVal = b.TryGetLimb(i, 0);
+            var aVal = a.OpTryGetLimb(i, 0);
+            var bVal = b.OpTryGetLimb(i, 0);
             var sum = (ulong)aVal + bVal + carry;
             result[i] = (uint)sum;
             carry = CryptographicOperations.ConstantTime.ExtractUpperBits(sum);
@@ -37,8 +37,8 @@ public partial class SecureBigInteger
         var result = new uint[maxLen];
         for (int i = 0; i < maxLen; i++)
         {
-            var aVal = a.TryGetLimb(i, 0);
-            var bVal = b.TryGetLimb(i, 0);
+            var aVal = a.OpTryGetLimb(i, 0);
+            var bVal = b.OpTryGetLimb(i, 0);
             var diff = (ulong)aVal - bVal - borrow;
             result[i] = (uint)diff;
             borrow = CryptographicOperations.ConstantTime.ExtractOverflowBit(diff);
@@ -48,25 +48,47 @@ public partial class SecureBigInteger
         return result;
     }
 
-    public static void AddInto(SecureBigInteger big, int offset, SecureBigInteger other)
+    public static void AddInto(SecureBigInteger a, int offset, SecureBigInteger b)
     {
         var carry = 0UL;
-        for (int i = 0; i < other.Length; i++)
+        for (int i = 0; i < b.Length; i++)
         {
-            var sum = (ulong)big[offset + i] + other.TryGetLimb(i, 0) + carry;
-            big[offset + i] = (uint)sum;
+            var sum = (ulong)a[offset + i] + b.OpTryGetLimb(i, 0) + carry;
+            a[offset + i] = (uint)sum;
             carry = sum >> 32;
         }
     
-        for (int i = offset + other.Length; i < big.Length; i++)
+        for (int i = offset + b.Length; i < a.Length; i++)
         {
-            var sum = big[i] + carry;
-            big[i] = (uint)sum;
+            var sum = a[i] + carry;
+            a[i] = (uint)sum;
+            carry = sum >> 32;
+        }
+    }
+    
+    public static void AddOrSubtractInto(SecureBigInteger a, int offset, SecureBigInteger b, uint shouldSubtract)
+    {
+        var mask = CryptographicOperations.ConstantTime.Select(shouldSubtract, 0xFFFFFFFF, 0);
+        var carry = CryptographicOperations.ConstantTime.Select(shouldSubtract, 1UL, 0UL);
+
+        for (int i = 0; i < b.Length; i++)
+        {
+            var aVal = a.OpTryGetLimb(offset + i, 0);
+            var bVal = b.OpTryGetLimb(i, 0) ^ mask;
+            var sum = (ulong)aVal + bVal + carry;
+            a.OpTrySetLimb(offset + i, (uint)sum);
+            carry = sum >> 32;
+        }
+    
+        for (int i = offset + b.Length; i < a.Length; i++)
+        {
+            var aVal = a.OpTryGetLimb(i, 0);
+            var sum = aVal + carry;
+            a[i] = (uint)sum;
             carry = sum >> 32;
         }
     }
     #endregion
-
     #region Optimized
     public static SecureBigInteger OpAOS(SecureBigInteger a, SecureBigInteger b, uint shouldSubtract)
     {
@@ -79,8 +101,8 @@ public partial class SecureBigInteger
         var carry = CryptographicOperations.ConstantTime.Select(shouldSubtract, 1UL, 0UL);
         for (int i = 0; i < maxLen; i++)
         {
-            var aVal = i < a.Length ? a[i] : 0;
-            var bVal = i < b.Length ? b[i] ^ mask : 0;
+            var aVal = a.OpTryGetLimb(i, 0);
+            var bVal = b.OpTryGetLimb(i, 0) ^ mask;
             var sum = (ulong)aVal + bVal + carry;
             result[i] = (uint)sum;
             carry = CryptographicOperations.ConstantTime.ExtractUpperBits(sum);
@@ -91,27 +113,21 @@ public partial class SecureBigInteger
         return new(result);
     }
     
-    public static void AddOrSubtractInto(SecureBigInteger big, int offset, SecureBigInteger other, uint shouldSubtract)
+    public static SecureBigInteger OpST(SecureBigInteger a, SecureBigInteger b, int resultLimbs)
     {
-        var mask = CryptographicOperations.ConstantTime.Select(shouldSubtract, 0xFFFFFFFF, 0);
-        var carry = CryptographicOperations.ConstantTime.Select(shouldSubtract, 1UL, 0UL);
-
-        for (int i = 0; i < other.Length; i++)
+        var result = new uint[resultLimbs];
+        var borrow = 0UL;
+    
+        for (int i = 0; i < resultLimbs; i++)
         {
-            var aVal = big.TryGetLimb(offset + i, 0);
-            var bVal = other.TryGetLimb(i, 0) ^ mask;
-            var sum = (ulong)aVal + bVal + carry;
-            big.TrySetLimb(offset + i, (uint)sum);
-            carry = sum >> 32;
+            var aVal = a.OpTryGetLimb(i, 0);
+            var bVal = b.OpTryGetLimb(i, 0);
+            var diff = (ulong)aVal - bVal - borrow;
+            result[i] = (uint)diff;
+            borrow = (diff >> 32) & 1;
         }
     
-        for (int i = offset + other.Length; i < big.Length; i++)
-        {
-            var aVal = big.TryGetLimb(i, 0);
-            var sum = aVal + carry;
-            big[i] = (uint)sum;
-            carry = sum >> 32;
-        }
+        return new(result);
     }
     #endregion
 }

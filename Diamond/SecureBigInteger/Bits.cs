@@ -63,8 +63,8 @@ public partial class SecureBigInteger
     
         for (int i = 0; i < maxLen; i++)
         {
-            var aVal = a.TryGetLimb(i, 0);
-            var bVal = b.TryGetLimb(i, 0);
+            var aVal = a.OpTryGetLimb(i, 0);
+            var bVal = b.OpTryGetLimb(i, 0);
             result[i] = aVal & bVal;
         }
     
@@ -77,8 +77,8 @@ public partial class SecureBigInteger
     
         for (int i = 0; i < maxLen; i++)
         {
-            var aVal = a.TryGetLimb(i, 0);
-            var bVal = b.TryGetLimb(i, 0);
+            var aVal = a.OpTryGetLimb(i, 0);
+            var bVal = b.OpTryGetLimb(i, 0);
             result[i] = aVal | bVal;
         }
     
@@ -91,8 +91,8 @@ public partial class SecureBigInteger
     
         for (int i = 0; i < maxLen; i++)
         {
-            var aVal = a.TryGetLimb(i, 0);
-            var bVal = b.TryGetLimb(i, 0);
+            var aVal = a.OpTryGetLimb(i, 0);
+            var bVal = b.OpTryGetLimb(i, 0);
             result[i] = aVal ^ bVal;
         }
     

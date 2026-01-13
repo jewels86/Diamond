@@ -9,7 +9,7 @@ public partial class SecureBigInteger
     public static SecureBigInteger operator /(SecureBigInteger a, SecureBigInteger b) => RaphaelDivide(a, b);
     public static SecureBigInteger operator %(SecureBigInteger a, SecureBigInteger b) => RaphaelReduce(a, b);
 
-    public static (SecureBigInteger quotient, SecureBigInteger remainder) Divide(SecureBigInteger a, SecureBigInteger b)
+    public static (SecureBigInteger quotient, SecureBigInteger remainder) LongDivide(SecureBigInteger a, SecureBigInteger b)
     {
         var quotient = new SecureBigInteger(new uint[a.Length]);
         var remainder = new SecureBigInteger(new uint[a.Length + 1]);
@@ -32,5 +32,9 @@ public partial class SecureBigInteger
         return (quotient, remainder);
     }
 
-    
+    public static SecureBigInteger OpRemT(SecureBigInteger a, SecureBigInteger quotient, SecureBigInteger b, int resultLimbs)
+    {
+        var product = quotient * b;
+        return OpST(a, product, resultLimbs);
+    }
 }

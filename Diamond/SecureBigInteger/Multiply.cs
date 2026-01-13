@@ -17,11 +17,11 @@ public partial class SecureBigInteger
 
         for (int i = 0; i < a.Length; i++)
         {
-            var aVal = a.TryGetLimb(i, 0);
+            var aVal = a.OpTryGetLimb(i, 0);
             var carry = 0UL;
             for (int j = 0; j < b.Length; j++)
             {
-                var bVal = b.TryGetLimb(j, 0);
+                var bVal = b.OpTryGetLimb(j, 0);
                 var product = (ulong)aVal * bVal + result[i + j] + carry;
                 result[i + j] = (uint)product;
                 carry = product >> 32;
@@ -32,7 +32,7 @@ public partial class SecureBigInteger
         return result;
     }
 
-    public static SecureBigInteger OpMSrT(SecureBigInteger a, SecureBigInteger b, int shiftBits, int resultLimbs)
+    public static SecureBigInteger OpMSrTSchoolbook(SecureBigInteger a, SecureBigInteger b, int shiftBits, int resultLimbs)
     {
         // this does an optimized Trim(a * b >> shiftBits, resultLimbs) (multiply, shift right, and trim)
         // this is NOT constant time with respect to shiftBits or resultLimbs!
@@ -90,7 +90,7 @@ public partial class SecureBigInteger
 
     public static SecureBigInteger KaratsubaMultiply(SecureBigInteger a, SecureBigInteger b)
     {
-        if (a.Length < 16 || b.Length < 16) return StandardMultiply(a, b);
+        if (a.Length < 32 || b.Length < 32) return StandardMultiply(a, b);
         
         var halfSize = Math.Max(a.Length, b.Length) / 2;
         
@@ -105,6 +105,12 @@ public partial class SecureBigInteger
         z1 = Subtract(z1 - z0, z2, out var borrow);
         
         return CombineKaratsuba(z2, z1, z0, halfSize, borrow);
+    }
+
+    public static SecureBigInteger OpMSrTKaratsuba(SecureBigInteger a, SecureBigInteger b, int shiftBits, int resultLimbs)
+    {
+        var product = KaratsubaMultiply(a, b);
+        return OpSrT(product, shiftBits, resultLimbs);
     }
     #endregion
 }
