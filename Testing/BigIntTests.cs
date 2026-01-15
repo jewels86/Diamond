@@ -180,6 +180,33 @@ public static class BigIntTests
         sw.Stop();
         Console.WriteLine($"GCD({a}, {b}) = {result}, took {sw.ElapsedMilliseconds}ms");
     }
+
+    public static void TestModInverse()
+    {
+        var a = new SecureBigInteger(3);
+        var b = new SecureBigInteger(11);
+        
+        var sw = Stopwatch.StartNew();
+        var result = SecureBigInteger.ModInverse(a, b);
+        sw.Stop();
+        Console.WriteLine($"ModInverse({a}, {b}) = {result}, took {sw.ElapsedMilliseconds}ms");
+
+        a = new SecureBigInteger(10);
+        b = new SecureBigInteger(15);
+        
+        sw = Stopwatch.StartNew();
+        result = SecureBigInteger.ModInverse(a, b);
+        sw.Stop();
+        Console.WriteLine($"ModInverse({a}, {b}) = {result}, took {sw.ElapsedMilliseconds}ms");
+        
+        a = GenerateRandomBigInt(20);
+        b = GenerateRandomBigInt(10);
+        
+        sw = Stopwatch.StartNew();
+        result = SecureBigInteger.ModInverse(a, b);
+        sw.Stop();
+        Console.WriteLine($"ModInverse({a}, {b}) = {result}, took {sw.ElapsedMilliseconds}ms");
+    }
     #endregion
     #region Barrett
     public static void TestBarrett()
