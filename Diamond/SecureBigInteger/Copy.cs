@@ -20,6 +20,7 @@ public partial class SecureBigInteger
         for (int i = 0; i < minLen; i++) result[i] = source[i];
         return new(result);
     }
+    public SecureBigInteger PadTo(int length) => Pad(this, length);
     
     public static SecureBigInteger Trim(SecureBigInteger source, int length) => Copy(source, 0, 0, length);
     public static SecureBigInteger Copy(SecureBigInteger source) => Copy(source, 0, 0, source.Length);

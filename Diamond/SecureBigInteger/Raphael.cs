@@ -13,7 +13,7 @@ public partial class SecureBigInteger
         k = (int)CryptographicOperations.ConstantTime.Select(usingHigher, (uint)k + 1, (uint)k);
         var n = Select(usingHigher, m - b, b - m);
 
-        var N = Math.Max(2 + aBitLength - b.BitLength, 32);
+        var N = Math.Max(2 + aBitLength, 32);
         var s = Math.Max(aBitLength, 64);
         var h = SafeLeftShift(n, s - k, b.BitLength + s);
 

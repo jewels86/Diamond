@@ -258,7 +258,7 @@ public static class BigIntTests
         Console.WriteLine($"RM(2311567, 14000) = {largeDivision} ({sw.ElapsedMilliseconds}ms)");
         
         var random1 = GenerateRandomBigInt(128);
-        var random2 = GenerateRandomBigInt(64);
+        var random2 = GenerateRandomBigInt(64).PadTo(128);
         var expected = ToPositiveBigInteger(random1) / ToPositiveBigInteger(random2);
         sw = Stopwatch.StartNew();
         var result = SecureBigInteger.RaphaelDivide(random1, random2);
@@ -270,7 +270,7 @@ public static class BigIntTests
         
         Console.WriteLine($"Our result:\t {ToPositiveBigInteger(result)}");
         Console.WriteLine($"Expected:\t {expected}");
-        Console.WriteLine($"RM([128 size], [64 size]) took {raphaelTime}ms vs long divide's {sw.ElapsedMilliseconds}");
+        Console.WriteLine($"RM([{random1.Length} size], [{random2.Length} size]) took {raphaelTime}ms vs long divide's {sw.ElapsedMilliseconds}");
         
         var baseBig = new SecureBigInteger(7);
         var exponent = new SecureBigInteger(3);
